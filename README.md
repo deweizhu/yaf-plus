@@ -11,3 +11,5 @@ http://kohanaframework.org/3.2/guide/kohana/helpers
 
 **twig:**
 http://twig.sensiolabs.org/
+
+`闲坐小窗读周易，不觉春去已多时；施主，苦海无边，回头是岸`

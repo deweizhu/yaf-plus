@@ -14,7 +14,7 @@ class IndexController extends Yaf_Controller_Abstract
     public function indexAction()
     {
         $this->_view->assign('title', '其实我是一个演员');
-        $this->_view->assign('name', '闲坐小窗读周易，不觉春去已多时');
+        $this->_view->assign('name', '施主，苦海无边，回头是岸');
         return TRUE;
     }
 
