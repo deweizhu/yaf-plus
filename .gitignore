@@ -1,0 +1,6 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/
+application/cache/
+application/logs/
+resources/fonts/
+resources/watermark/
