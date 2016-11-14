@@ -81,6 +81,7 @@ abstract class Kohana_Database {
                 'persistent' => $config->persistent,
             );
 
+            $_config['table_prefix'] = $config->table_prefix;
             // Set the driver class name
 			$driver = 'Database_'.ucfirst($_config['type']);
             // Create the database connection instance
