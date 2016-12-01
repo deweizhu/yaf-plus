@@ -3,11 +3,11 @@
 /**
  * Text helper class. Provides simple methods for working with text.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Helpers
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2007-2012 Elixir Team
+ * @license
  */
 class Text
 {
@@ -517,7 +517,7 @@ class Text
      *
      * @return  string       $str         处理后字串
      */
-    public static function semiangle($str)
+    public static function semiangle($str):string
     {
         $arr = array('０' => '0', '１' => '1', '２' => '2', '３' => '3', '４' => '4',
                      '５' => '5', '６' => '6', '７' => '7', '８' => '8', '９' => '9',
@@ -550,7 +550,7 @@ class Text
      * @param $val
      * @return bool
      */
-    public static function is_utf8($val)
+    public static function is_utf8($val):bool
     {
         // From http://w3.org/International/questions/qa-forms-utf-8.html
         return preg_match('%^(?:
@@ -569,7 +569,7 @@ class Text
      * 36位UUID
      * @return string
      */
-    public static function uuid()
+    public static function uuid():string
     {
         // The field names refer to RFC 4122 section 4.1.2
         return sprintf('%04x%04x-%04x-%03x4-%04x-%04x%04x%04x',
@@ -588,7 +588,7 @@ class Text
      * 32位UUID，无-横杠
      * @return string
      */
-    public static function uuid32()
+    public static function uuid32():string
     {
         // The field names refer to RFC 4122 section 4.1.2
         return sprintf('%04x%04x%04x%03x4%04x%04x%04x%04x',
@@ -609,7 +609,7 @@ class Text
      * @param string $data
      * @return string
      */
-    public static function authtoken($data = null,  $IMEI)
+    public static function authtoken($data = null, string $IMEI):string
     {
         if (PHP_SAPI == 'cli') {
             $http_host = '';
@@ -625,7 +625,7 @@ class Text
      * @param  $randid  字符串
      * @return string   guid
      */
-    public static function token($mix = null)
+    public static function token($mix = null):string
     {
         if (is_null($mix)) {
             $randid = uniqid(mt_rand(), true);
@@ -654,7 +654,7 @@ class Text
      * @param $str
      * @return mixed
      */
-    public static function filterStyle($str)
+    public static function filterStyle(string $str):string
     {
         $str = preg_replace("/<sty(.*)\\/style>|<scr(.*)\\/script>|<!--(.*)-->/isU", '', $str);
         $str = preg_replace('#class=["\']([^"\']*)["\']#i', '', $str);
@@ -671,7 +671,7 @@ class Text
      * @param $str
      * @return string
      */
-    public static function html2text($str)
+    public static function html2text(string $str):string
     {
         $str = preg_replace(
             "/<sty(.*)\\/style>|<scr(.*)\\/script>|<!--(.*)-->/isU", '', $str);
@@ -690,7 +690,7 @@ class Text
      * @param   string $currency 货币名称简写字母（三个大小字母）
      * @return  string
      */
-    public static function currency_price_format($price,  $currency = 'CNY')
+    public static function currency_price_format(float $price, string $currency = 'CNY'):string
     {
         if ($price === '') {
             $price = 0;

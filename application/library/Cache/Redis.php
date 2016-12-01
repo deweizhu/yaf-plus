@@ -6,9 +6,9 @@
  *
  * - required PhpRedis
  *
- * @link https://github.com/Zogame/Kohana_Cache_Redis.git
+ * @link https://github.com/Zogame/Elixir_Cache_Redis.git
  * @link https://github.com/nicolasff/phpredis
- * @link https://github.com/puneetk/kohana-redis-cache
+ * @link https://github.com/puneetk/Elixir-redis-cache
  *
  * @author Chris Go <chris@velocimedia.com>
  */
@@ -52,7 +52,7 @@ class Cache_Redis extends Cache implements Cache_Tagging
 
         if (empty($servers))
         {
-            throw new Kohana_Exception('No Redis servers defined in configuration');
+            throw new Elixir_Exception('No Redis servers defined in configuration');
         }
 
         foreach($servers as $server)

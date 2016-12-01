@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * [Kohana Cache](api/Cache) Wincache driver. Provides an opcode based
- * driver for the Kohana Cache library.
+ * [Elixir Cache](api/Cache) Wincache driver. Provides an opcode based
+ * driver for the Elixir Cache library.
  *
  * ### Configuration example
  *
@@ -35,26 +35,26 @@
  * *  PHP 5.2.X, Non-thread-safe build
  * *  PHP 5.3 X86, Non-thread-safe VC9 build
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_Wincache extends Kohana_Cache {
+class Cache_Wincache extends Elixir_Cache {
 
 	/**
 	 * Check for existence of the wincache extension This method cannot be invoked externally. The driver must
 	 * be instantiated using the `Cache::instance()` method.
 	 *
 	 * @param  array  $config  configuration
-	 * @throws Kohana_Exception
+	 * @throws Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
 		if ( ! extension_loaded('wincache'))
 		{
-			throw new Kohana_Exception('PHP wincache extension is not available.');
+			throw new Elixir_Exception('PHP wincache extension is not available.');
 		}
 
 		parent::__construct($config);
@@ -72,7 +72,7 @@ class Cache_Wincache extends Kohana_Cache {
 	 * @param   string  $id       id of cache to entry
 	 * @param   string  $default  default value to return if cache miss
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function get($id, $default = NULL)
 	{

@@ -11,13 +11,13 @@
  * - The [mbstring extension](http://php.net/mbstring) is highly recommended,
  *   but must not be overloading string functions
  *
- * [!!] This file is licensed differently from the rest of Kohana. As a port of
+ * [!!] This file is licensed differently from the rest of Elixir. As a port of
  * [phputf8](http://phputf8.sourceforge.net/), this file is released under the LGPL.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
+ * @author     Elixir Team
+ * @copyright  (c) 2007-2012 Elixir Team
  * @copyright  (c) 2005 Harry Fuecks
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
@@ -867,7 +867,7 @@ class UTF8 {
 			return $pad_left.$str.$pad_right;
 		}
 
-		throw new Kohana_Exception("self::str_pad: Unknown padding type (:pad_type)", array(
+		throw new Elixir_Exception("self::str_pad: Unknown padding type (:pad_type)", array(
 			':pad_type' => $pad_type,
 		));
 	}
@@ -1005,7 +1005,7 @@ class UTF8 {
 
 		if ( ! isset($chr[1]))
 		{
-			throw new Kohana_Exception('Short sequence - at least 2 bytes expected, only 1 seen');
+			throw new Elixir_Exception('Short sequence - at least 2 bytes expected, only 1 seen');
 		}
 
 		$ord1 = ord($chr[1]);
@@ -1015,7 +1015,7 @@ class UTF8 {
 
 		if ( ! isset($chr[2]))
 		{
-			throw new Kohana_Exception('Short sequence - at least 3 bytes expected, only 2 seen');
+			throw new Elixir_Exception('Short sequence - at least 3 bytes expected, only 2 seen');
 		}
 
 		$ord2 = ord($chr[2]);
@@ -1025,7 +1025,7 @@ class UTF8 {
 
 		if ( ! isset($chr[3]))
 		{
-			throw new Kohana_Exception('Short sequence - at least 4 bytes expected, only 3 seen');
+			throw new Elixir_Exception('Short sequence - at least 4 bytes expected, only 3 seen');
 		}
 
 		$ord3 = ord($chr[3]);
@@ -1035,7 +1035,7 @@ class UTF8 {
 
 		if ( ! isset($chr[4]))
 		{
-			throw new Kohana_Exception('Short sequence - at least 5 bytes expected, only 4 seen');
+			throw new Elixir_Exception('Short sequence - at least 5 bytes expected, only 4 seen');
 		}
 
 		$ord4 = ord($chr[4]);
@@ -1045,7 +1045,7 @@ class UTF8 {
 
 		if ( ! isset($chr[5]))
 		{
-			throw new Kohana_Exception('Short sequence - at least 6 bytes expected, only 5 seen');
+			throw new Elixir_Exception('Short sequence - at least 6 bytes expected, only 5 seen');
 		}
 
 		if ($ord0 >= 252 AND $ord0 <= 253)
@@ -1053,7 +1053,7 @@ class UTF8 {
 
 		if ($ord0 >= 254 AND $ord0 <= 255)
 		{
-			throw new Kohana_Exception("Invalid UTF-8 with surrogate ordinal ':ordinal'", array(
+			throw new Elixir_Exception("Invalid UTF-8 with surrogate ordinal ':ordinal'", array(
 				':ordinal' => $ord0,
 			));
 		}
@@ -1202,7 +1202,7 @@ class UTF8 {
 				{
 					// ((0xC0 & (*in) != 0x80) AND (m_state != 0))
 					// Incomplete multi-octet sequence
-					throw new Kohana_Exception("self::to_unicode: Incomplete multi-octet sequence in UTF-8 at byte ':byte'", array(
+					throw new Elixir_Exception("self::to_unicode: Incomplete multi-octet sequence in UTF-8 at byte ':byte'", array(
 						':byte' => $i,
 					));
 				}
@@ -1257,7 +1257,7 @@ class UTF8 {
 			elseif ($arr[$k] >= 0xD800 AND $arr[$k] <= 0xDFFF)
 			{
 				// Found a surrogate
-				throw new Kohana_Exception("self::from_unicode: Illegal surrogate at index: ':index', value: ':value'", array(
+				throw new Elixir_Exception("self::from_unicode: Illegal surrogate at index: ':index', value: ':value'", array(
 					':index' => $k,
 					':value' => $arr[$k],
 				));
@@ -1280,7 +1280,7 @@ class UTF8 {
 			// Out of range
 			else
 			{
-				throw new Kohana_Exception("self::from_unicode: Codepoint out of Unicode range at index: ':index', value: ':value'", array(
+				throw new Elixir_Exception("self::from_unicode: Codepoint out of Unicode range at index: ':index', value: ':value'", array(
 					':index' => $k,
 					':value' => $arr[$k],
 				));

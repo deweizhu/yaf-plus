@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Kohana Cache provides a common interface to a variety of caching engines. Tags are
- * supported where available natively to the cache system. Kohana Cache supports multiple
+ * Elixir Cache provides a common interface to a variety of caching engines. Tags are
+ * supported where available natively to the cache system. Elixir Cache supports multiple
  * instances of cache engines through a grouped singleton pattern.
  *
  * ### Supported cache engines
@@ -28,7 +28,7 @@
  *
  * ### Configuration settings
  *
- * Kohana Cache uses configuration groups to create cache instances. A configuration group can
+ * Elixir Cache uses configuration groups to create cache instances. A configuration group can
  * use any supported driver, with successive groups using the same driver type if required.
  *
  * #### Configuration example
@@ -50,7 +50,7 @@
  *     )
  *
  * In cases where only one cache group is required, set `Cache::$default` (in your bootstrap,
- * or by extending `Kohana_Cache` class) to the name of the group, and use:
+ * or by extending `Elixir_Cache` class) to the name of the group, and use:
  *
  *     $cache = Cache::instance(); // instead of Cache::instance('memcache')
  *
@@ -68,17 +68,17 @@
  *
  * ### System requirements
  *
- * *  Kohana 3.0.x
+ * *  Elixir 3.0.x
  * *  PHP 5.2.4 or greater
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
  * @version    2.0
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-abstract class Kohana_Cache {
+abstract class Elixir_Cache {
 
 	const DEFAULT_EXPIRE = 3600;
 
@@ -88,12 +88,12 @@ abstract class Kohana_Cache {
 	public static $default = 'file';
 
 	/**
-	 * @var   Kohana_Cache instances
+	 * @var   Elixir_Cache instances
 	 */
 	public static $instances = array();
 
 	/**
-	 * Creates a singleton of a Kohana Cache group. If no group is supplied
+	 * Creates a singleton of a Elixir Cache group. If no group is supplied
 	 * the __default__ cache group is used.
 	 *
 	 *     // Create an instance of the default group
@@ -107,7 +107,7 @@ abstract class Kohana_Cache {
 	 *
 	 * @param   string  $group  the name of the cache group to use [Optional]
 	 * @return  Cache
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public static function instance($group = NULL)
 	{
@@ -124,12 +124,12 @@ abstract class Kohana_Cache {
 			return Cache::$instances[$group];
 		}
 
-		$config = Yaf_Registry::get("config")->get('cache');
+		$config = Yaf_Application::app()->getConfig()->get('cache');
 
 		if ( ! $config->offsetExists($group))
 		{
-			throw new Kohana_Exception(
-				'Failed to load Kohana Cache group: :group',
+			throw new Elixir_Exception(
+				'Failed to load Elixir Cache group: :group',
 				array(':group' => $group)
 			);
 		}
@@ -204,11 +204,11 @@ abstract class Kohana_Cache {
 	 * Overload the __clone() method to prevent cloning
 	 *
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	final public function __clone()
 	{
-		throw new Kohana_Exception('Cloning of Kohana_Cache objects is forbidden');
+		throw new Elixir_Exception('Cloning of Elixir_Cache objects is forbidden');
 	}
 
 	/**
@@ -226,7 +226,7 @@ abstract class Kohana_Cache {
 	 * @param   string  $id       id of cache to entry
 	 * @param   string  $default  default value to return if cache miss
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	abstract public function get($id, $default = NULL);
 
@@ -301,4 +301,4 @@ abstract class Kohana_Cache {
 		return str_replace(array('/', '\\', ' '), '_', $id);
 	}
 }
-// End Kohana_Cache
+// End Elixir_Cache

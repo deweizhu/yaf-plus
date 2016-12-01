@@ -2,11 +2,11 @@
 /**
  * Array helper.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Helpers
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2007-2012 Elixir Team
+ * @license
  */
 class Arr {
 

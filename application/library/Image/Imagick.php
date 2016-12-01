@@ -2,11 +2,11 @@
 /**
  * Support for image manipulation using [Imagick](http://php.net/Imagick).
  *
- * @package    Kohana/Image
+ * @package    Elixir/Image
  * @category   Drivers
  * @author     Tamas Mihalik tamas.mihalik@gmail.com
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license.html
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license.html
  */
 class Image_Imagick extends Image {
 
@@ -18,14 +18,14 @@ class Image_Imagick extends Image {
 	/**
 	 * Checks if ImageMagick is enabled.
 	 *
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 * @return  boolean
 	 */
 	public static function check()
 	{
 		if ( ! extension_loaded('imagick'))
 		{
-			throw new Kohana_Exception('Imagick is not installed, or the extension is not loaded');
+			throw new Elixir_Exception('Imagick is not installed, or the extension is not loaded');
 		}
 
 		return Image_Imagick::$_checked = TRUE;
@@ -35,7 +35,7 @@ class Image_Imagick extends Image {
 	 * Runs [Image_Imagick::check] and loads the image.
 	 *
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function __construct($file)
 	{
@@ -304,7 +304,7 @@ class Image_Imagick extends Image {
 	 *
 	 * @param   string  $extension  image extension: png, jpg, etc
 	 * @return  string  IMAGETYPE_* constant
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function _get_imagetype($extension)
 	{
@@ -325,11 +325,11 @@ class Image_Imagick extends Image {
 				$type = IMAGETYPE_PNG;
 			break;
 			default:
-				throw new Kohana_Exception('Installed ImageMagick does not support :type images',
+				throw new Elixir_Exception('Installed ImageMagick does not support :type images',
 					array(':type' => $extension));
 			break;
 		}
 
 		return array($format, $type);
 	}
-} // End Kohana_Image_Imagick
+} // End Elixir_Image_Imagick

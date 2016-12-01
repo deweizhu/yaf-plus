@@ -4,11 +4,11 @@
  *
  * [!!] This class does not support extensions, only additional writers.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Logging
- * @author     Kohana Team
- * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
 class Log {
 

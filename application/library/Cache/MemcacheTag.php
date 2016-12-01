@@ -2,12 +2,12 @@
 /**
  * See [Cache_Memcache]
  *
-* @package    Kohana/Cache
+* @package    Elixir/Cache
 * @category   Base
 * @version    2.0
-* @author     Kohana Team
-* @copyright  (c) 2009-2012 Kohana Team
-* @license    http://kohanaphp.com/license
+* @author     Elixir Team
+* @copyright  (c) 2009-2012 Elixir Team
+* @license    http://Elixirphp.com/license
  */
 class Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 
@@ -15,7 +15,7 @@ class Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 	 * Constructs the memcache object
 	 *
 	 * @param  array  $config  configuration
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
@@ -23,7 +23,7 @@ class Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 
 		if ( ! method_exists($this->_memcache, 'tag_add'))
 		{
-			throw new Kohana_Exception('Memcached-tags PHP plugin not present. Please see http://code.google.com/p/memcached-tags/ for more information');
+			throw new Elixir_Exception('Memcached-tags PHP plugin not present. Please see http://code.google.com/p/memcached-tags/ for more information');
 		}
 	}
 
@@ -69,10 +69,10 @@ class Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 	 *
 	 * @param   string  $tag  tag
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function find($tag)
 	{
-		throw new Kohana_Exception('Memcached-tags does not support finding by tag');
+		throw new Elixir_Exception('Memcached-tags does not support finding by tag');
 	}
 }

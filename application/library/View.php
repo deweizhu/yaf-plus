@@ -8,6 +8,24 @@
  */
 class View
 {
+
+    /**
+     * 给Twig模板分配自定义函数
+     * @param $ctl            控制器，用$this传递过来即可
+     * @param $funName        twig模板中使用的函数名
+     * @param $InnerFunName   映射到静态方法名
+     * @param $InnerClass     映射到类名
+     */
+    public static function twigFunction($ctl, string $funName, string $InnerFunName = NULL, string $InnerClass = NULL)
+    {
+        $InnerFunName === NULL AND $InnerFunName = $funName;
+        $InnerClass === NULL AND $InnerClass = 'View';
+        $ctl->getView()->getTwig()->addFunction(new Twig_SimpleFunction($funName,
+            array($InnerClass, $InnerFunName),
+            array('needs_context' => true)
+        ));
+    }
+
     /**
      * 使用方法：
      * <?php echo View::asset('/asset/gmu/zepto.min.js'); ?>
@@ -15,9 +33,14 @@ class View
      * @param $uri
      * @return string
      */
-    public static function asset($uri)
+    public static function asset(...$args)
     {
-        $file = DOCROOT . $uri;
+        if (func_num_args() === 1)
+            $uri = $args[0];
+        else
+            list($context, $uri) = $args;
+        if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE) return $uri;
+        $file = PUBPATH . $uri;
         if (!is_file($file)) {
             return '';
         }

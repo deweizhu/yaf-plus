@@ -3,11 +3,11 @@
 /**
  * Database query builder for SELECT statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_Query_Builder_Select extends Database_Query_Builder_Where
 {
@@ -314,7 +314,7 @@ class Database_Query_Builder_Select extends Database_Query_Builder_Where
             $select = DB::select()->from($select);
         }
         if (!$select instanceof Database_Query_Builder_Select)
-            throw new Kohana_Exception('first parameter must be a string or an instance of Database_Query_Builder_Select');
+            throw new Elixir_Exception('first parameter must be a string or an instance of Database_Query_Builder_Select');
         $this->_union [] = array('select' => $select, 'all' => $all);
         return $this;
     }

@@ -2,11 +2,11 @@
 /**
  * File log writer. Writes out messages and stores them in a YYYY/MM directory.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Logging
- * @author     Kohana Team
- * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
 class Log_File extends Log_Writer {
 
@@ -32,7 +32,7 @@ class Log_File extends Log_Writer {
 	{
 		if ( ! is_dir($directory) OR ! is_writable($directory))
 		{
-			throw new Kohana_Exception('Directory :dir must be writable',
+			throw new Elixir_Exception('Directory :dir must be writable',
 				array(':dir' => Debug::path($directory)));
 		}
 

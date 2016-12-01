@@ -2,11 +2,11 @@
 /**
  * Database query builder for JOIN statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_Query_Builder_Join extends Database_Query_Builder {
 
@@ -54,7 +54,7 @@ class Database_Query_Builder_Join extends Database_Query_Builder {
 	{
 		if ( ! empty($this->_using))
 		{
-			throw new Kohana_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
+			throw new Elixir_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
 		}
 
 		$this->_on[] = array($c1, $op, $c2);
@@ -72,7 +72,7 @@ class Database_Query_Builder_Join extends Database_Query_Builder {
 	{
 		if ( ! empty($this->_on))
 		{
-			throw new Kohana_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
+			throw new Elixir_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
 		}
 
 		$columns = func_get_args();

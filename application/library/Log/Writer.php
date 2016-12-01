@@ -2,11 +2,11 @@
 /**
  * Log writer abstract class. All [Log] writers must extend this class.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Logging
- * @author     Kohana Team
- * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
 abstract class Log_Writer {
 

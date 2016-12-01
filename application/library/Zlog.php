@@ -31,7 +31,7 @@ class Zlog
      * params mix $info
      * return void
      **/
-    public static function write($info):void
+    public static function write($info)
     {
         if (self::$console === FALSE && self::$logfile === '')
             self::$logfile = APPPATH . '/logs/' . date('Y-m-d') . '.log';

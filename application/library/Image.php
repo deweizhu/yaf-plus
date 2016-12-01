@@ -7,4 +7,4 @@
  * ->save(DOCROOT . '/thumb.jpg', 65);
  * Class Image
  */
-abstract class Image extends Kohana_Image {}
+abstract class Image extends Elixir_Image {}

@@ -13,13 +13,13 @@
  *
  * You pass the same parameters to these functions as you pass to the objects they return.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Kohana_DB {
+class Elixir_DB {
 
 	/**
 	 * Create a new [Database_Query] of the given type.

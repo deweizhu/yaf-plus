@@ -2,11 +2,11 @@
 /**
  * Database query builder. See [Query Builder](/database/query/builder) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 abstract class Database_Query_Builder extends Database_Query {
 
@@ -17,7 +17,7 @@ abstract class Database_Query_Builder extends Database_Query {
 	 * @param   array   $joins  join statements
 	 * @return  string
 	 */
-	protected function _compile_join(Database $db, array $joins)
+	protected function _compile_join(Database $db, array $joins): string
 	{
 		$statements = array();
 
@@ -38,7 +38,7 @@ abstract class Database_Query_Builder extends Database_Query {
 	 * @param   array   $conditions  condition statements
 	 * @return  string
 	 */
-	protected function _compile_conditions(Database $db, array $conditions)
+	protected function _compile_conditions(Database $db, array $conditions): string
 	{
 		$last_condition = NULL;
 
@@ -148,7 +148,7 @@ abstract class Database_Query_Builder extends Database_Query {
 	 * @param   array   $values  updated values
 	 * @return  string
 	 */
-	protected function _compile_set(Database $db, array $values)
+	protected function _compile_set(Database $db, array $values): string
 	{
 		$set = array();
 		foreach ($values as $group)
@@ -178,7 +178,7 @@ abstract class Database_Query_Builder extends Database_Query {
 	 * @param   array   $columns
 	 * @return  string
 	 */
-	protected function _compile_group_by(Database $db, array $columns)
+	protected function _compile_group_by(Database $db, array $columns): string
 	{
 		$group = array();
 
@@ -208,7 +208,7 @@ abstract class Database_Query_Builder extends Database_Query {
 	 * @param   array   $columns  sorting columns
 	 * @return  string
 	 */
-	protected function _compile_order_by(Database $db, array $columns)
+	protected function _compile_order_by(Database $db, array $columns): string
 	{
 		$sort = array();
 		foreach ($columns as $group)

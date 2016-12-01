@@ -1,16 +1,16 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Kohana Cache Sqlite Driver
+ * Elixir Cache Sqlite Driver
  *
  * Requires SQLite3 and PDO
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageCollect {
+class Cache_Sqlite extends Elixir_Cache implements Cache_Tagging, Cache_GarbageCollect {
 
 	/**
 	 * Database resource
@@ -24,7 +24,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 * initialises the PDO connection
 	 *
 	 * @param  array  $config  configuration
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
@@ -34,7 +34,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 
 		if ($database === NULL)
 		{
-			throw new Kohana_Exception('Database path not available in Kohana Cache configuration');
+			throw new Elixir_Exception('Database path not available in Elixir Cache configuration');
 		}
 
 		// Load new Sqlite DB
@@ -50,7 +50,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 
 			if ($database_schema === NULL)
 			{
-				throw new Kohana_Exception('Database schema not found in Kohana Cache configuration');
+				throw new Elixir_Exception('Database schema not found in Elixir Cache configuration');
 			}
 
 			try
@@ -60,7 +60,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 			}
 			catch (PDOException $e)
 			{
-				throw new Kohana_Exception('Failed to create new SQLite caches table with the following error : :error', array(':error' => $e->getMessage()));
+				throw new Elixir_Exception('Failed to create new SQLite caches table with the following error : :error', array(':error' => $e->getMessage()));
 			}
 		}
 	}
@@ -71,7 +71,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 * @param   string  $id       id
 	 * @param   string  $default  default [Optional] Default value to return if id not found
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function get($id, $default = NULL)
 	{
@@ -85,7 +85,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		if ( ! $result = $statement->fetch(PDO::FETCH_OBJ))
@@ -135,7 +135,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 *
 	 * @param   string  $id  id
 	 * @return  boolean
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function delete($id)
 	{
@@ -149,7 +149,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		return (bool) $statement->rowCount();
@@ -172,7 +172,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		return (bool) $statement->rowCount();
@@ -186,7 +186,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 * @param   integer  $lifetime  lifetime [Optional]
 	 * @param   array    $tags      tags [Optional]
 	 * @return  boolean
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function set_with_tags($id, $data, $lifetime = NULL, array $tags = NULL)
 	{
@@ -207,7 +207,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 
 		// Prepare statement
-		// $this->exists() may throw Kohana_Exception, no need to catch/rethrow
+		// $this->exists() may throw Elixir_Exception, no need to catch/rethrow
 		$statement = $this->exists($id) ? $this->_db->prepare('UPDATE caches SET expiration = :expiration, cache = :cache, tags = :tags WHERE id = :id') : $this->_db->prepare('INSERT INTO caches (id, cache, expiration, tags) VALUES (:id, :cache, :expiration, :tags)');
 
 		// Try to insert
@@ -217,7 +217,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		return (bool) $statement->rowCount();
@@ -228,7 +228,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 *
 	 * @param   string  $tag  tag
 	 * @return  boolean
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function delete_tag($tag)
 	{
@@ -242,7 +242,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		return (bool) $statement->rowCount();
@@ -253,7 +253,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 *
 	 * @param   string  $tag  tag
 	 * @return  array
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function find($tag)
 	{
@@ -270,7 +270,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		$result = array();
@@ -306,7 +306,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 	}
 
@@ -315,7 +315,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 	 *
 	 * @param   string  $id  id
 	 * @return  boolean
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function exists($id)
 	{
@@ -326,7 +326,7 @@ class Cache_Sqlite extends Kohana_Cache implements Cache_Tagging, Cache_GarbageC
 		}
 		catch (PDOExeption $e)
 		{
-			throw new Kohana_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
+			throw new Elixir_Exception('There was a problem querying the local SQLite3 cache. :error', array(':error' => $e->getMessage()));
 		}
 
 		return (bool) $statement->fetchAll();

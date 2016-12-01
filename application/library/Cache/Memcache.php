@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * [Kohana Cache](api/Cache) Memcache driver,
+ * [Elixir Cache](api/Cache) Memcache driver,
  *
  * ### Supported cache engines
  *
@@ -68,19 +68,19 @@
  *
  * ### System requirements
  *
- * *  Kohana 3.0.x
+ * *  Elixir 3.0.x
  * *  PHP 5.2.4 or greater
  * *  Memcache (plus Memcached-tags for native tagging support)
  * *  Zlib
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
  * @version    2.0
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_Memcache extends Kohana_Cache implements Cache_Arithmetic {
+class Cache_Memcache extends Elixir_Cache implements Cache_Arithmetic {
 
 	// Memcache has a maximum cache lifetime of 30 days
 	const CACHE_CEILING = 2592000;
@@ -110,14 +110,14 @@ class Cache_Memcache extends Kohana_Cache implements Cache_Arithmetic {
 	 * Constructs the memcache Cache object
 	 *
 	 * @param   array  $config  configuration
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
 		// Check for the memcache extention
 		if ( ! extension_loaded('memcache'))
 		{
-			throw new Kohana_Exception('Memcache PHP extention not loaded');
+			throw new Elixir_Exception('Memcache PHP extention not loaded');
 		}
 
 		parent::__construct($config);
@@ -131,7 +131,7 @@ class Cache_Memcache extends Kohana_Cache implements Cache_Arithmetic {
 		if ( ! $servers)
 		{
 			// Throw an exception if no server found
-			throw new Kohana_Exception('No Memcache servers defined in configuration');
+			throw new Elixir_Exception('No Memcache servers defined in configuration');
 		}
 
 		// Setup default server configuration
@@ -155,7 +155,7 @@ class Cache_Memcache extends Kohana_Cache implements Cache_Arithmetic {
 
 			if ( ! $this->_memcache->addServer($server['host'], $server['port'], $server['persistent'], $server['weight'], $server['timeout'], $server['retry_interval'], $server['status'], $server['failure_callback']))
 			{
-				throw new Kohana_Exception('Memcache could not connect to host \':host\' using port \':port\'', array(':host' => $server['host'], ':port' => $server['port']));
+				throw new Elixir_Exception('Memcache could not connect to host \':host\' using port \':port\'', array(':host' => $server['host'], ':port' => $server['port']));
 			}
 		}
 
@@ -175,7 +175,7 @@ class Cache_Memcache extends Kohana_Cache implements Cache_Arithmetic {
 	 * @param   string  $id       id of cache to entry
 	 * @param   string  $default  default value to return if cache miss
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function get($id, $default = NULL)
 	{

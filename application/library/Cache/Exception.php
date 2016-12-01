@@ -1,11 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Kohana Cache Exception
+ * Elixir Cache Exception
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_Exception extends Kohana_Exception {}
+class Cache_Exception extends Elixir_Exception {}

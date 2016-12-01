@@ -2,11 +2,11 @@
 /**
  * Syslog log writer.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Logging
  * @author     Jeremy Bush
- * @copyright  (c) 2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @copyright  (c) 2012 Elixir Team
+ * @license
  */
 class Syslog extends Log_Writer {
 
@@ -24,7 +24,7 @@ class Syslog extends Log_Writer {
 	 * @param   int     $facility   facility to log to
 	 * @return  void
 	 */
-	public function __construct($ident = 'KohanaPHP', $facility = LOG_USER)
+	public function __construct($ident = 'ElixirPHP', $facility = LOG_USER)
 	{
 		$this->_ident = $ident;
 

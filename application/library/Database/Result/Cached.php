@@ -2,11 +2,11 @@
 /**
  * Object used for caching the results of select queries.  See [Results](/database/results#select-cached) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query/Result
- * @author     Kohana Team
- * @copyright  (c) 2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_Result_Cached extends Database_Result {
 

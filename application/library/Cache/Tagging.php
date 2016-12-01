@@ -1,12 +1,12 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Kohana Cache Tagging Interface
+ * Elixir Cache Tagging Interface
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 interface Cache_Tagging {
 

@@ -2,11 +2,11 @@
 /**
  * MySQLi database connection.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Drivers
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_MySQLi extends Database {
 
@@ -72,7 +72,7 @@ class Database_MySQLi extends Database {
 			// No connection exists
 			$this->_connection = NULL;
 
-			throw new Kohana_Exception(':error', array(':error' => $e->getMessage()), $e->getCode());
+			throw new Elixir_Exception(':error', array(':error' => $e->getMessage()), $e->getCode());
 		}
 
 		// \xFF is a better delimiter, but the PHP driver uses underscore
@@ -98,7 +98,7 @@ class Database_MySQLi extends Database {
 		}
 	}
 
-	public function disconnect()
+	public function disconnect(): bool
 	{
 		try
 		{
@@ -126,7 +126,7 @@ class Database_MySQLi extends Database {
 		return $status;
 	}
 
-	public function set_charset($charset)
+	public function set_charset(string $charset)
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -144,11 +144,11 @@ class Database_MySQLi extends Database {
 
 		if ($status === FALSE)
 		{
-			throw new Kohana_Exception(':error', array(':error' => $this->_connection->error), $this->_connection->errno);
+			throw new Elixir_Exception(':error', array(':error' => $this->_connection->error), $this->_connection->errno);
 		}
 	}
 
-	public function query($type, $sql, $as_object = FALSE, array $params = NULL)
+	public function query(int $type, string $sql, bool $as_object = FALSE, array $params = NULL)
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -157,7 +157,7 @@ class Database_MySQLi extends Database {
 		// Execute the query
 		if (($result = $this->_connection->query($sql)) === FALSE)
 		{
-			throw new Kohana_Exception(':error [ :query ]', array(
+			throw new Elixir_Exception(':error [ :query ]', array(
 				':error' => $this->_connection->error,
 				':query' => $sql
 			), $this->_connection->errno);
@@ -186,7 +186,7 @@ class Database_MySQLi extends Database {
 		}
 	}
 
-	public function datatype($type)
+	public function datatype(string $type): array
 	{
 		static $types = array
 		(
@@ -242,14 +242,14 @@ class Database_MySQLi extends Database {
 	 * @param string $mode  Isolation level
 	 * @return boolean
 	 */
-	public function begin($mode = NULL)
+	public function begin(string $mode = ''): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
 
 		if ($mode AND ! $this->_connection->query("SET TRANSACTION ISOLATION LEVEL $mode"))
 		{
-			throw new Kohana_Exception(':error', array(
+			throw new Elixir_Exception(':error', array(
 				':error' => $this->_connection->error
 			), $this->_connection->errno);
 		}
@@ -262,7 +262,7 @@ class Database_MySQLi extends Database {
 	 *
 	 * @return boolean
 	 */
-	public function commit()
+	public function commit(): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -275,7 +275,7 @@ class Database_MySQLi extends Database {
 	 *
 	 * @return boolean
 	 */
-	public function rollback()
+	public function rollback(): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -283,7 +283,7 @@ class Database_MySQLi extends Database {
 		return (bool) $this->_connection->query('ROLLBACK');
 	}
 
-	public function list_tables($like = NULL)
+	public function list_tables(string $like = ''): string
 	{
 		if (is_string($like))
 		{
@@ -305,7 +305,7 @@ class Database_MySQLi extends Database {
 		return $tables;
 	}
 
-	public function list_columns($table, $like = NULL, $add_prefix = TRUE)
+	public function list_columns(string $table, string $like = NULL, bool $add_prefix = TRUE): array
 	{
 		// Quote the table name
 		$table = ($add_prefix === TRUE) ? $this->quote_table($table) : $table;
@@ -360,6 +360,7 @@ class Database_MySQLi extends Database {
 						case 'char':
 						case 'varchar':
 							$column['character_maximum_length'] = $length;
+                            break;
 						case 'text':
 						case 'tinytext':
 						case 'mediumtext':
@@ -387,14 +388,28 @@ class Database_MySQLi extends Database {
 		return $columns;
 	}
 
-	public function escape($value)
+    public function get_primary(string $table, bool $add_prefix = TRUE)
+    {
+        // Quote the table name
+        $table = ($add_prefix === TRUE) ? $this->quote_table($table) : $table;
+
+        $primary = array();
+        $result = $this->query(Database::SELECT, 'SHOW COLUMNS FROM '.$table, FALSE);
+        foreach ($result as $r)
+        {
+            if($r['Key'] == 'PRI') $primary[] = $r['Field'];
+        }
+        return count($primary) == 1 ? $primary[0] : (empty($primary) ? null : $primary);
+    }
+
+	public function escape(string $value): string
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
 
 		if (($value = $this->_connection->real_escape_string( (string) $value)) === FALSE)
 		{
-			throw new Kohana_Exception(':error', array(
+			throw new Elixir_Exception(':error', array(
 				':error' => $this->_connection->error,
 			), $this->_connection->errno);
 		}

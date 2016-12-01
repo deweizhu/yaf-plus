@@ -2,10 +2,8 @@
 
 /**
  *  输出JSON/buffer等
- *
- * @author: ZDW
  */
-class Helper_Response
+class Response
 {
     /**
      *   生成JSON格式的正确消息

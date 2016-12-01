@@ -2,11 +2,11 @@
 /**
  * Database result wrapper.  See [Results](/database/results) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query/Result
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 abstract class Database_Result implements Countable, Iterator, SeekableIterator, ArrayAccess {
 
@@ -31,11 +31,11 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 *
 	 * @param   mixed   $result     query result
 	 * @param   string  $sql        SQL query
-	 * @param   mixed   $as_object
+	 * @param   bool   $as_object
 	 * @param   array   $params
 	 * @return  void
 	 */
-	public function __construct($result, $sql, $as_object = FALSE, array $params = NULL)
+	public function __construct($result, string $sql, bool $as_object = FALSE, array $params = NULL)
 	{
 		// Store the result locally
 		$this->_result = $result;
@@ -43,11 +43,11 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 		// Store the SQL locally
 		$this->_query = $sql;
 
-		if (is_object($as_object))
-		{
+//		if (is_object($as_object))
+//		{
 			// Get the object class name
-			$as_object = get_class($as_object);
-		}
+//			$as_object = get_class($as_object);
+//		}
 
 		// Results as objects or associative arrays
 		$this->_as_object = $as_object;
@@ -95,11 +95,11 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 * @param   string  $value  column for values
 	 * @return  array
 	 */
-	public function as_array($key = NULL, $value = NULL)
+	public function as_array(string $key = '', string $value = '')
 	{
 		$results = array();
 
-		if ($key === NULL AND $value === NULL)
+		if ($key === '' AND $value === '')
 		{
 			// Indexed rows
 
@@ -108,7 +108,7 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 				$results[] = $row;
 			}
 		}
-		elseif ($key === NULL)
+		elseif ($key === '')
 		{
 			// Indexed columns
 
@@ -127,7 +127,7 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 				}
 			}
 		}
-		elseif ($value === NULL)
+		elseif ($value === '')
 		{
 			// Associative rows
 
@@ -181,7 +181,7 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 * @param   mixed   $default  default value if the column does not exist
 	 * @return  mixed
 	 */
-	public function get($name, $default = NULL)
+	public function get(string $name, $default = NULL)
 	{
 		$row = $this->current();
 
@@ -210,7 +210,6 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	{
 		return $this->_total_rows;
 	}
-
 	/**
 	 * Implements [ArrayAccess::offsetExists], determines if row exists.
 	 *
@@ -222,7 +221,7 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 * @param   int     $offset
 	 * @return  boolean
 	 */
-	public function offsetExists($offset)
+	public function offsetExists($offset): bool
 	{
 		return ($offset >= 0 AND $offset < $this->_total_rows);
 	}
@@ -251,11 +250,11 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 * @param   int     $offset
 	 * @param   mixed   $value
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	final public function offsetSet($offset, $value)
 	{
-		throw new Kohana_Exception('Database results are read-only');
+		throw new Elixir_Exception('Database results are read-only');
 	}
 
 	/**
@@ -265,11 +264,11 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 *
 	 * @param   int     $offset
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	final public function offsetUnset($offset)
 	{
-		throw new Kohana_Exception('Database results are read-only');
+		throw new Elixir_Exception('Database results are read-only');
 	}
 
 	/**
@@ -330,7 +329,7 @@ abstract class Database_Result implements Countable, Iterator, SeekableIterator,
 	 *
 	 * @return  boolean
 	 */
-	public function valid()
+	public function valid(): bool
 	{
 		return $this->offsetExists($this->_current_row);
 	}

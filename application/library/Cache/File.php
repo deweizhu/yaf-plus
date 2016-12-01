@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * [Kohana Cache](api/Cache) File driver. Provides a file based
- * driver for the Kohana Cache library. This is one of the slowest
+ * [Elixir Cache](api/Cache) File driver. Provides a file based
+ * driver for the Elixir Cache library. This is one of the slowest
  * caching methods.
  *
  * ### Configuration example
@@ -29,16 +29,16 @@
  *
  * ### System requirements
  *
- * *  Kohana 3.0.x
+ * *  Elixir 3.0.x
  * *  PHP 5.2.4 or greater
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
+class Cache_File extends Elixir_Cache implements Cache_GarbageCollect {
 
 	/**
 	 * Creates a hashed filename based on the string. This is used
@@ -65,7 +65,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 	 * be instantiated using the `Cache::instance()` method.
 	 *
 	 * @param   array  $config  config
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
@@ -92,19 +92,19 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 		// If the defined directory is a file, get outta here
 		if ($this->_cache_dir->isFile())
 		{
-			throw new Kohana_Exception('Unable to create cache directory as a file already exists : :resource', array(':resource' => $this->_cache_dir->getRealPath()));
+			throw new Elixir_Exception('Unable to create cache directory as a file already exists : :resource', array(':resource' => $this->_cache_dir->getRealPath()));
 		}
 
 		// Check the read status of the directory
 		if ( ! $this->_cache_dir->isReadable())
 		{
-			throw new Kohana_Exception('Unable to read from the cache directory :resource', array(':resource' => $this->_cache_dir->getRealPath()));
+			throw new Elixir_Exception('Unable to read from the cache directory :resource', array(':resource' => $this->_cache_dir->getRealPath()));
 		}
 
 		// Check the write status of the directory
 		if ( ! $this->_cache_dir->isWritable())
 		{
-			throw new Kohana_Exception('Unable to write to the cache directory :resource', array(':resource' => $this->_cache_dir->getRealPath()));
+			throw new Elixir_Exception('Unable to write to the cache directory :resource', array(':resource' => $this->_cache_dir->getRealPath()));
 		}
 	}
 
@@ -120,7 +120,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 	 * @param   string   $id       id of cache to entry
 	 * @param   string   $default  default value to return if cache miss
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function get($id, $default = NULL)
 	{
@@ -172,7 +172,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 			// Handle ErrorException caused by failed unserialization
 			if ($e->getCode() === E_NOTICE)
 			{
-				throw new Kohana_Exception(__METHOD__.' failed to unserialize cached object with message : '.$e->getMessage());
+				throw new Elixir_Exception(__METHOD__.' failed to unserialize cached object with message : '.$e->getMessage());
 			}
 
 			// Otherwise throw the exception
@@ -233,7 +233,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 			if ($e->getCode() === E_NOTICE)
 			{
 				// Throw a caching error
-				throw new Kohana_Exception(__METHOD__.' failed to serialize data for caching with message : '.$e->getMessage());
+				throw new Elixir_Exception(__METHOD__.' failed to serialize data for caching with message : '.$e->getMessage());
 			}
 
 			// Else rethrow the error exception
@@ -298,7 +298,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 	 * @param   boolean      $ignore_errors            ignore_errors to prevent all exceptions interrupting exec
 	 * @param   boolean      $only_expired             only expired files
 	 * @return  boolean
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function _delete_file(SplFileInfo $file, $retain_parent_directory = FALSE, $ignore_errors = FALSE, $only_expired = FALSE)
 	{
@@ -339,7 +339,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 					// Catch any delete file warnings
 					if ($e->getCode() === E_WARNING)
 					{
-						throw new Kohana_Exception(__METHOD__.' failed to delete file : :file', array(':file' => $file->getRealPath()));
+						throw new Elixir_Exception(__METHOD__.' failed to delete file : :file', array(':file' => $file->getRealPath()));
 					}
 				}
 			}
@@ -388,7 +388,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 					// Catch any delete directory warnings
 					if ($e->getCode() === E_WARNING)
 					{
-						throw new Kohana_Exception(__METHOD__.' failed to delete directory : :directory', array(':directory' => $file->getRealPath()));
+						throw new Elixir_Exception(__METHOD__.' failed to delete directory : :directory', array(':directory' => $file->getRealPath()));
 					}
 					throw $e;
 				}
@@ -437,7 +437,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 	 * @param   boolean   $recursive    allows nested directories creation
 	 * @param   resource  $context      a stream context
 	 * @return  SplFileInfo
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	protected function _make_directory($directory, $mode = 0777, $recursive = FALSE, $context = NULL)
 	{
@@ -449,7 +449,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 		// throw an exception if unsuccessful
 		if ( ! $mkdir_result)
 		{
-			throw new Kohana_Exception('Failed to create the defined cache directory : :directory', array(':directory' => $directory));
+			throw new Elixir_Exception('Failed to create the defined cache directory : :directory', array(':directory' => $directory));
 		}
 
 		// chmod to solve potential umask issues
@@ -474,7 +474,7 @@ class Cache_File extends Kohana_Cache implements Cache_GarbageCollect {
 		// If we're at the EOF at this point, corrupted!
 		if ($data->eof())
 		{
-			throw new Kohana_Exception(__METHOD__ . ' corrupted cache file!');
+			throw new Elixir_Exception(__METHOD__ . ' corrupted cache file!');
 		}
 
 		//close file

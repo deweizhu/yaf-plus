@@ -5,13 +5,13 @@
  *  $file = DOCROOT .'/2111-old.jpg';
  * Image::factory($file)->resize(684, 335, Image::AUTO)->background('#FFFFFF')
  * ->save(DOCROOT . '/thumb.jpg', 65);
- * @package    Kohana/Image
+ * @package    Elixir/Image
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license.html
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license.html
  */
-abstract class Kohana_Image {
+abstract class Elixir_Image {
 
 	// Resizing constraints
 	const NONE    = 0x01;
@@ -89,7 +89,7 @@ abstract class Kohana_Image {
 	 *
 	 * @param   string  $file  image file path
 	 * @return  void
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function __construct($file)
 	{
@@ -108,7 +108,7 @@ abstract class Kohana_Image {
 
 		if (empty($file) OR empty($info))
 		{
-			throw new Kohana_Exception('Not an image or invalid image: :file',
+			throw new Elixir_Exception('Not an image or invalid image: :file',
 				array(':file' => Debug::path($file)));
 		}
 
@@ -139,13 +139,13 @@ abstract class Kohana_Image {
 		}
 		catch (Exception $e)
 		{
-			if (is_object(Kohana::$log))
+			if (is_object(Elixir::$log))
 			{
 				// Get the text of the exception
-				$error = Kohana_Exception::text($e);
+				$error = Elixir_Exception::text($e);
 
 				// Add this exception to the log
-				Kohana::$log->add(Log::ERROR, $error);
+				Elixir::$log->add(Log::ERROR, $error);
 			}
 
 			// Showing any kind of error will be "inside" image data
@@ -201,7 +201,7 @@ abstract class Kohana_Image {
         }
         else
         {
-        /*{{{ Kohana原缩略图尺寸算法  */
+        /*{{{ Elixir原缩略图尺寸算法  */
             if ($master === NULL)
             {
                 // Choose the master dimension automatically
@@ -630,7 +630,7 @@ abstract class Kohana_Image {
 	 * @param   integer  $quality  quality of image: 1-100
 	 * @return  boolean
 	 * @uses    Image::_save
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function save($file = NULL, $quality = 100)
 	{
@@ -644,7 +644,7 @@ abstract class Kohana_Image {
 		{
 			if ( ! is_writable($file))
 			{
-				throw new Kohana_Exception('File must be writable: :file',
+				throw new Elixir_Exception('File must be writable: :file',
 					array(':file' => Debug::path($file)));
 			}
 		}
@@ -659,7 +659,7 @@ abstract class Kohana_Image {
             //}}}
 			if ( ! is_dir($directory) OR ! is_writable($directory))
 			{
-				throw new Kohana_Exception('Directory must be writable: :directory',
+				throw new Elixir_Exception('Directory must be writable: :directory',
 					array(':directory' => Debug::path($directory)));
 			}
 		}

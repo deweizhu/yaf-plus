@@ -2,11 +2,11 @@
 /**
  * Database query builder for DELETE statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_Query_Builder_Delete extends Database_Query_Builder_Where {
 
@@ -28,7 +28,7 @@ class Database_Query_Builder_Delete extends Database_Query_Builder_Where {
 		}
 
 		// Start the query with no SQL
-		return parent::__construct(Database::DELETE, '');
+        parent::__construct(Database::DELETE, '');
 	}
 
 	/**

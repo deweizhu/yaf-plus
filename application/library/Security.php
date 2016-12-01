@@ -2,11 +2,11 @@
 /**
  * Security helper class.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Security
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2007-2012 Elixir Team
+ * @license
  */
 class Security {
 

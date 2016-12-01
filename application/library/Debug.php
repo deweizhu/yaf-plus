@@ -2,11 +2,11 @@
 /**
  * Contains debugging and dumping tools.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2008-2014 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
 class Debug {
 
@@ -240,8 +240,8 @@ class Debug {
 	 * replacing them with the plain text equivalents. Useful for debugging
 	 * when you want to display a shorter path.
 	 *
-	 *     // Displays SYSPATH/classes/kohana.php
-	 *     echo Debug::path(Kohana::find_file('classes', 'kohana'));
+	 *     // Displays SYSPATH/classes/Elixir.php
+	 *     echo Debug::path(Elixir::find_file('classes', 'Elixir'));
 	 *
 	 * @param   string  $file   path to debug
 	 * @return  string

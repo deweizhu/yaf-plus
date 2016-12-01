@@ -3,11 +3,11 @@
 /**
  * Database query wrapper.  See [Parameterized Statements](database/query/parameterized) for usage and examples.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Query
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_Query
 {
@@ -38,7 +38,7 @@ class Database_Query
      * @param   string $sql query string
      * @return  void
      */
-    public function __construct($type, $sql)
+    public function __construct(int $type, string $sql)
     {
         $this->_type = $type;
         $this->_sql = $sql;
@@ -49,13 +49,13 @@ class Database_Query
      *
      * @return  string
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             // Return the SQL string
             return $this->compile(Database::instance());
         } catch (Exception $e) {
-            return Kohana_Exception::text($e);
+            return Elixir_Exception::text($e);
         }
     }
 
@@ -64,7 +64,7 @@ class Database_Query
      *
      * @return  integer
      */
-    public function type()
+    public function type():int
     {
         return $this->_type;
     }
@@ -73,15 +73,15 @@ class Database_Query
      * Enables the query to be cached for a specified amount of time.
      *
      * @param   integer  $lifetime  number of seconds to cache, 0 deletes it from the cache
-     * @param   boolean  whether or not to execute the query during a cache hit
+     * @param   boolean  $force  whether or not to execute the query during a cache hit
      * @return  $this
      */
-    public function cached($lifetime = NULL, $force = FALSE)
+    public function cached(int $lifetime = 0, bool $force = FALSE)
     {
-        if ($lifetime === NULL)
+        if ($lifetime === 0)
         {
             // Use the global setting
-            $lifetime = Yaf_Registry::get("config")->get('cache.cache_life') ? : Kohana_Cache::DEFAULT_EXPIRE;
+            $lifetime = Yaf_Application::app()->getConfig()->get('cache.cache_life') ? : Elixir_Cache::DEFAULT_EXPIRE;
         }
 
         $this->_force_execute = $force;
@@ -106,11 +106,11 @@ class Database_Query
     /**
      * Returns results as objects
      *
-     * @param   string $class classname or TRUE for stdClass
+     * @param   bool $class classname or TRUE for stdClass
      * @param   array $params
      * @return  $this
      */
-    public function as_object($class = TRUE, array $params = NULL)
+    public function as_object(bool $class = TRUE, array $params = NULL)
     {
         $this->_as_object = $class;
 
@@ -129,7 +129,7 @@ class Database_Query
      * @param   mixed $value value to use
      * @return  $this
      */
-    public function param($param, $value)
+    public function param(string $param, $value)
     {
         // Add or overload a new parameter
         $this->_parameters[$param] = $value;
@@ -144,7 +144,7 @@ class Database_Query
      * @param   mixed $var variable to use
      * @return  $this
      */
-    public function bind($param, & $var)
+    public function bind(string $param, & $var)
     {
         // Bind a value to a variable
         $this->_parameters[$param] =& $var;
@@ -198,13 +198,13 @@ class Database_Query
      * Execute the current query on the given database.
      *
      * @param   mixed $db Database instance or name of instance
-     * @param   string   result object classname, TRUE for stdClass or FALSE for array
+     * @param   bool   result object classname, TRUE for stdClass or FALSE for array
      * @param   array    result object constructor arguments
      * @return  object   Database_Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
-    public function execute($db = NULL, $as_object = NULL, $object_params = NULL)
+    public function execute($db = NULL, bool $as_object = NULL, array $object_params = NULL)
     {
         if (!is_object($db)) {
             // Get the database instance
@@ -232,6 +232,11 @@ class Database_Query
                 return new Database_Result_Cached($result, $sql, $as_object, $object_params);
             }
         }
+        
+        // 增加sql 日志输出
+//         $log = Log::instance();
+//         $log->add(Log::NOTICE, ':sql',[':sql'=>$sql]);
+        
         // Execute the query
         $result = $db->query($this->_type, $sql, $as_object, $object_params);
         if (isset($cache_key) AND $this->_lifetime > 0) {
@@ -239,6 +244,26 @@ class Database_Query
             Cache::instance()->set($cache_key, $result->as_array(), $this->_lifetime);
         }
         return $result;
+    }
+
+    /**
+     * 计算记录总数
+     * @param null $db
+     * @return int
+     */
+    public function count_records($db = NULL): int
+    {
+        if (!is_object($db)) {
+            // Get the database instance
+            $db = Database::instance($db);
+        }
+
+        // Compile the SQL query
+        $sql = $this->compile($db);
+        preg_match('#FROM(.*)(LIMIT|ORDER)#isU', $sql, $matches);
+        $sql = trim($matches[1]);
+        return $db->query(Database::SELECT, 'SELECT COUNT(*) AS total_row_count FROM '.$sql, FALSE)
+            ->get('total_row_count', 0);
     }
 
 } // End Database_Query

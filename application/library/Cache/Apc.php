@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * [Kohana Cache](api/Cache) APC driver. Provides an opcode based
- * driver for the Kohana Cache library.
+ * [Elixir Cache](api/Cache) APC driver. Provides an opcode based
+ * driver for the Elixir Cache library.
  *
  * ### Configuration example
  *
@@ -26,30 +26,30 @@
  *
  * ### System requirements
  *
- * *  Kohana 3.0.x
+ * *  Elixir 3.0.x
  * *  PHP 5.2.4 or greater
  * *  APC PHP extension
  *
- * @package    Kohana/Cache
+ * @package    Elixir/Cache
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2009-2012 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
-class Cache_Apc extends Kohana_Cache implements Cache_Arithmetic {
+class Cache_Apc extends Elixir_Cache implements Cache_Arithmetic {
 
 	/**
 	 * Check for existence of the APC extension This method cannot be invoked externally. The driver must
 	 * be instantiated using the `Cache::instance()` method.
 	 *
 	 * @param  array  $config  configuration
-	 * @throws Kohana_Exception
+	 * @throws Elixir_Exception
 	 */
 	protected function __construct(array $config)
 	{
 		if ( ! extension_loaded('apc'))
 		{
-			throw new Kohana_Exception('PHP APC extension is not available.');
+			throw new Elixir_Exception('PHP APC extension is not available.');
 		}
 
 		parent::__construct($config);
@@ -67,7 +67,7 @@ class Cache_Apc extends Kohana_Cache implements Cache_Arithmetic {
 	 * @param   string  $id       id of cache to entry
 	 * @param   string  $default  default value to return if cache miss
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function get($id, $default = NULL)
 	{

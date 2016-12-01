@@ -4,13 +4,13 @@
  * Variables can be assigned with the view object and referenced locally within
  * the view.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
-class Kohana_View {
+class Elixir_View {
 
 	// Array of global variables
 	protected static $_global_data = array();
@@ -23,11 +23,11 @@ class Kohana_View {
 	 *
 	 * @param   string  $file   view filename
 	 * @param   array   $data   array of values
-	 * @return  Kohana_View
+	 * @return  Elixir_View
 	 */
 	public static function factory($file = NULL, array $data = NULL)
 	{
-		return new Kohana_View($file, $data);
+		return new Elixir_View($file, $data);
 	}
 
 	/**
@@ -37,15 +37,15 @@ class Kohana_View {
 	 *
 	 *     $output = self::capture($file, $data);
 	 *
-	 * @param   string  $kohana_view_filename   filename
-	 * @param   array   $kohana_view_data       variables
+	 * @param   string  $Elixir_view_filename   filename
+	 * @param   array   $Elixir_view_data       variables
 	 * @return  string
 	 * @throws  Exception
 	 */
-	protected static function capture($kohana_view_filename, array $kohana_view_data)
+	protected static function capture($Elixir_view_filename, array $Elixir_view_data)
 	{
 		// Import the view variables to local namespace
-		extract($kohana_view_data, EXTR_SKIP);
+		extract($Elixir_view_data, EXTR_SKIP);
 
 		if (self::$_global_data)
 		{
@@ -59,7 +59,7 @@ class Kohana_View {
 		try
 		{
 			// Load the view within the current scope
-			include $kohana_view_filename;
+			include $Elixir_view_filename;
 		}
 		catch (Exception $e)
 		{
@@ -162,7 +162,7 @@ class Kohana_View {
 	 *
 	 * @param   string  $key    variable name
 	 * @return  mixed
-	 * @throws  Kohana_Exception
+	 * @throws  Elixir_Exception
 	 */
 	public function & __get($key)
 	{
@@ -176,7 +176,7 @@ class Kohana_View {
 		}
 		else
 		{
-			throw new Kohana_Exception('View variable is not set: :var',
+			throw new Elixir_Exception('View variable is not set: :var',
 				array(':var' => $key));
 		}
 	}
@@ -243,7 +243,7 @@ class Kohana_View {
 			 * We use this method here because it's impossible to throw an
 			 * exception from __toString().
 			 */
-			return Kohana_Exception::_handler($e);
+			return Elixir_Exception::_handler($e);
 		}
 	}
 
@@ -260,7 +260,7 @@ class Kohana_View {
 	{
 		if (!is_file($file))
 		{
-			throw new Kohana_Exception('The requested view :file could not be found', array(
+			throw new Elixir_Exception('The requested view :file could not be found', array(
 				':file' => $file,
 			));
 		}
@@ -350,7 +350,7 @@ class Kohana_View {
 
 		if (empty($this->_file))
 		{
-			throw new Kohana_Exception('You must set the file to use within your view before rendering');
+			throw new Elixir_Exception('You must set the file to use within your view before rendering');
 		}
 
 		// Combine local and global data and capture the output

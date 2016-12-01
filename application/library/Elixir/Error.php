@@ -49,7 +49,7 @@ function koggle(elem)
 }
 </script>
 <div id="Exception_error">
-	<h1><span class="type"><?php echo str_replace('Kohana_', '', $class) ?> [ <?php echo $code ?> ]:</span> <span class="message"><?php echo htmlspecialchars( (string) $message, ENT_QUOTES | ENT_IGNORE, 'utf-8', TRUE); ?></span></h1>
+	<h1><span class="type"><?php echo str_replace('Elixir_', '', $class) ?> [ <?php echo $code ?> ]:</span> <span class="message"><?php echo htmlspecialchars( (string) $message, ENT_QUOTES | ENT_IGNORE, 'utf-8', TRUE); ?></span></h1>
 	<div id="<?php echo $error_id ?>" class="content">
 		<p><span class="file"><?php echo Debug::path($file) ?> [ <?php echo $line ?> ]</span></p>
 		<?php echo Debug::source($file, $line) ?>

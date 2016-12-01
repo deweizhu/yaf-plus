@@ -2,11 +2,11 @@
 /**
  * STDERR log writer. Writes out messages to STDERR.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Logging
- * @author     Kohana Team
- * @copyright  (c) 2008-2014 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
 class Log_StdErr extends Log_Writer {
 	/**

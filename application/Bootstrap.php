@@ -9,17 +9,15 @@
  * 调用的次序, 和申明的次序相同
  */
 require __DIR__ . '/Constant.php';
+
 class Bootstrap extends Yaf_Bootstrap_Abstract
 {
 
     public function _initConfig()
     {
         //运行环境
-        $environ = Yaf_Application::app()->environ();
-        //把配置保存起来
-        $appconfig = Yaf_Application::app()->getConfig();
-        Yaf_Registry::set('config', $appconfig);
-        Yaf_Registry::set('setting', new Yaf_Config_Ini(DOCROOT . '/conf/setting.ini', $environ));
+//        $environ = Yaf_Application::app()->environ();
+//        Yaf_Registry::set('setting', new Yaf_Config_Ini(DOCROOT . '/conf/setting.ini', $environ));
 
         /**
          * 设置默认时区
@@ -28,20 +26,20 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
          */
         date_default_timezone_set('Asia/Shanghai');
 
-        // Load the logger if one doesn't already exist
-        if (!Kohana_Exception::$log instanceof Log)
-        {
-            Kohana_Exception::$log = Log::instance();
-            Kohana_Exception::$error_view = MODPATH . '/Kohana/Error.php';
-        }
-        /**
-         * Attach the file write to logging. Multiple writers are supported.
-         */
-        Kohana_Exception::$log->attach(new Log_File(APPPATH.'/logs'));
+        Elixir::init();
+//        Elixir::init([
+//            'base_url'   => '/',
+//            'index_file' => 'index.php',
+//            'charset'    => 'utf-8',
+//            'cache_dir'  => STORAGEPATH . '/cache',
+//            'cache_life' => 60,
+//        ]);
 
-        Cookie::$salt = $appconfig->get('cookie.salt');
-        Cookie::$domain = $appconfig->get('cookie.salt');
-        Cache::$default = $appconfig->get('cache.default');
+        //Cookie 设置
+        $config = Yaf_Application::app()->getConfig();
+        Cookie::$salt = $config->get('cookie.salt');
+        Cookie::$domain = $config->get('cookie.salt');
+        Cache::$default = $config->get('cache.default');
     }
 
     public function _initPlugin(Yaf_Dispatcher $dispatcher)

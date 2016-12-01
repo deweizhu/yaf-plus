@@ -2,18 +2,18 @@
 /**
  * PDO database connection.
  *
- * @package    Kohana/Database
+ * @package    Elixir/Database
  * @category   Drivers
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license    http://Elixirphp.com/license
  */
 class Database_PDO extends Database {
 
 	// PDO uses no quoting for identifiers
 	protected $_identifier = '';
 
-	public function __construct($name, array $config)
+	public function __construct(string $name, array $config)
 	{
 		parent::__construct($name, $config);
 
@@ -56,7 +56,7 @@ class Database_PDO extends Database {
 		}
 		catch (PDOException $e)
 		{
-			throw new Kohana_Exception(':error',
+			throw new Elixir_Exception(':error',
 				array(':error' => $e->getMessage()),
 				$e->getCode());
 		}
@@ -113,7 +113,7 @@ class Database_PDO extends Database {
 		);
 	}
 
-	public function disconnect()
+	public function disconnect():bool
 	{
 		// Destroy the PDO object
 		$this->_connection = NULL;
@@ -121,7 +121,7 @@ class Database_PDO extends Database {
 		return parent::disconnect();
 	}
 
-	public function set_charset($charset)
+	public function set_charset(string $charset)
 	{
 		// Make sure the database is connected
 		$this->_connection OR $this->connect();
@@ -130,7 +130,7 @@ class Database_PDO extends Database {
 		$this->_connection->exec('SET NAMES '.$this->quote($charset));
 	}
 
-	public function query($type, $sql, $as_object = FALSE, array $params = NULL)
+	public function query(int $type, string $sql, bool $as_object = FALSE, array $params = NULL)
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -142,7 +142,7 @@ class Database_PDO extends Database {
 		catch (Exception $e)
 		{
 			// Convert the exception in a database exception
-			throw new Kohana_Exception(':error [ :query ]',
+			throw new Elixir_Exception(':error [ :query ]',
 				array(
 					':error' => $e->getMessage(),
 					':query' => $sql
@@ -189,7 +189,7 @@ class Database_PDO extends Database {
 		}
 	}
 
-	public function begin($mode = NULL)
+	public function begin(string $mode = ''): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -197,7 +197,7 @@ class Database_PDO extends Database {
 		return $this->_connection->beginTransaction();
 	}
 
-	public function commit()
+	public function commit(): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -205,7 +205,7 @@ class Database_PDO extends Database {
 		return $this->_connection->commit();
 	}
 
-	public function rollback()
+	public function rollback(): bool
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
@@ -213,19 +213,126 @@ class Database_PDO extends Database {
 		return $this->_connection->rollBack();
 	}
 
-	public function list_tables($like = NULL)
+	public function list_tables(string $like = ''): string
 	{
-		throw new Kohana_Exception('Database method :method is not supported by :class',
-			array(':method' => __FUNCTION__, ':class' => __CLASS__));
+        if (is_string($like))
+        {
+            // Search for table names
+            $result = $this->query(Database::SELECT, 'SHOW TABLES LIKE '.$this->quote($like), FALSE);
+        }
+        else
+        {
+            // Find all table names
+            $result = $this->query(Database::SELECT, 'SHOW TABLES', FALSE);
+        }
+
+        $tables = array();
+        foreach ($result as $row)
+        {
+            $tables[] = reset($row);
+        }
+
+        return $tables;
 	}
 
-	public function list_columns($table, $like = NULL, $add_prefix = TRUE)
+	public function list_columns(string $table, string $like = NULL, bool $add_prefix = TRUE): array
 	{
-		throw new Kohana_Exception('Database method :method is not supported by :class',
-			array(':method' => __FUNCTION__, ':class' => __CLASS__));
+        // Quote the table name
+        $table = ($add_prefix === TRUE) ? $this->quote_table($table) : $table;
+
+        if (is_string($like))
+        {
+            // Search for column names
+            $result = $this->query(Database::SELECT, 'SHOW FULL COLUMNS FROM '.$table.' LIKE '.$this->quote($like), FALSE);
+        }
+        else
+        {
+            // Find all column names
+            $result = $this->query(Database::SELECT, 'SHOW FULL COLUMNS FROM '.$table, FALSE);
+        }
+
+        $count = 0;
+        $columns = array();
+        foreach ($result as $row)
+        {
+            list($type, $length) = $this->_parse_type($row['Type']);
+
+            $column = $this->datatype($type);
+
+            $column['column_name']      = $row['Field'];
+            $column['column_default']   = $row['Default'];
+            $column['data_type']        = $type;
+            $column['is_nullable']      = ($row['Null'] == 'YES');
+            $column['ordinal_position'] = ++$count;
+
+            switch ($column['type'])
+            {
+                case 'float':
+                    if (isset($length))
+                    {
+                        list($column['numeric_precision'], $column['numeric_scale']) = explode(',', $length);
+                    }
+                    break;
+                case 'int':
+                    if (isset($length))
+                    {
+                        // MySQL attribute
+                        $column['display'] = $length;
+                    }
+                    break;
+                case 'string':
+                    switch ($column['data_type'])
+                    {
+                        case 'binary':
+                        case 'varbinary':
+                            $column['character_maximum_length'] = $length;
+                            break;
+                        case 'char':
+                        case 'varchar':
+                            $column['character_maximum_length'] = $length;
+                            break;
+                        case 'text':
+                        case 'tinytext':
+                        case 'mediumtext':
+                        case 'longtext':
+                            $column['collation_name'] = $row['Collation'];
+                            break;
+                        case 'enum':
+                        case 'set':
+                            $column['collation_name'] = $row['Collation'];
+                            $column['options'] = explode('\',\'', substr($length, 1, -1));
+                            break;
+                    }
+                    break;
+            }
+
+            // MySQL attributes
+            $column['comment']      = $row['Comment'];
+            $column['extra']        = $row['Extra'];
+            $column['key']          = $row['Key'];
+            $column['privileges']   = $row['Privileges'];
+
+            $columns[$row['Field']] = $column;
+        }
+
+        return $columns;
 	}
 
-	public function escape($value)
+    public function get_primary(string $table, bool $add_prefix = TRUE)
+    {
+        // Quote the table name
+        $table = ($add_prefix === TRUE) ? $this->quote_table($table) : $table;
+
+        $primary = array();
+        $result = $this->query(Database::SELECT, 'SHOW COLUMNS FROM '.$table, FALSE);
+        foreach ($result as $r)
+        {
+            if($r['Key'] == 'PRI') $primary[] = $r['Field'];
+        }
+        return count($primary) == 1 ? $primary[0] : (empty($primary) ? null : $primary);
+    }
+
+	public function escape(string $value): string
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();

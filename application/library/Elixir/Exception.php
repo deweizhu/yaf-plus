@@ -1,14 +1,14 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 /**
- * Kohana exception class. Translates exceptions using the [I18n] class.
+ * Elixir exception class. Translates exceptions using the [I18n] class.
  *
- * @package    Kohana
+ * @package    Elixir
  * @category   Exceptions
- * @author     Kohana Team
- * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @author     Elixir Team
+ * @copyright  (c) 2016-2017 Elixir Team
+ * @license
  */
-class Kohana_Exception extends Exception {
+class Elixir_Exception extends Exception {
 
 	/**
 	 * @var  array  PHP error code => human readable name
@@ -28,7 +28,7 @@ class Kohana_Exception extends Exception {
 	/**
 	 * @var  string  error rendering view
 	 */
-	public static $error_view = 'Kohana/Error.php';
+	public static $error_view = 'Elixir/Error.php';
 
 	/**
 	 * @var  string  error view content type
@@ -43,7 +43,7 @@ class Kohana_Exception extends Exception {
 	/**
 	 * Creates a new translated exception.
 	 *
-	 *     throw new Kohana_Exception('Something went terrible wrong, :user',
+	 *     throw new Elixir_Exception('Something went terrible wrong, :user',
 	 *         array(':user' => $user));
 	 *
 	 * @param   string          $message    error message
@@ -54,12 +54,11 @@ class Kohana_Exception extends Exception {
 	 */
 	public function __construct($message = "", array $variables = NULL, $code = 0, Exception $previous = NULL)
 	{
-//        // Load the logger if one doesn't already exist
-//        if (!self::$log instanceof Log)
-//        {
-//            self::$log = Log::instance();
-//        }
-
+        // Load the logger if one doesn't already exist
+        if (!self::$log instanceof Log)
+        {
+            self::$log = Log::instance();
+        }
 		// Set the message
         if ($variables) {
             foreach ($variables as $key => $val) {
@@ -79,25 +78,25 @@ class Kohana_Exception extends Exception {
 	 *
 	 *     echo $exception;
 	 *
-	 * @uses    Kohana_Exception::text
+	 * @uses    Elixir_Exception::text
 	 * @return  string
 	 */
 	public function __toString()
 	{
-		return Kohana_Exception::text($this);
+		return Elixir_Exception::text($this);
 	}
 
 	/**
 	 * Inline exception handler, displays the error message, source of the
 	 * exception, and the stack trace of the error.
 	 *
-	 * @uses    Kohana_Exception::response
+	 * @uses    Elixir_Exception::response
 	 * @param   Exception  $e
 	 * @return  void
 	 */
 	public static function handler(Exception $e)
 	{
-		$response = Kohana_Exception::_handler($e);
+		$response = Elixir_Exception::_handler($e);
         if ('product' !== Yaf_Application::app()->environ()) {
             // Send the response to the browser
             echo $response;
@@ -109,7 +108,7 @@ class Kohana_Exception extends Exception {
 	 * Exception handler, logs the exception and generates a Response object
 	 * for display.
 	 *
-	 * @uses    Kohana_Exception::response
+	 * @uses    Elixir_Exception::response
 	 * @param   Exception  $e
 	 * @return  Response
 	 */
@@ -118,10 +117,10 @@ class Kohana_Exception extends Exception {
 		try
 		{
 			// Log the exception
-			Kohana_Exception::log($e);
+			Elixir_Exception::log($e);
 
 			// Generate the response
-			$response = Kohana_Exception::response($e);
+			$response = Elixir_Exception::response($e);
 
 			return $response;
 		}
@@ -137,7 +136,7 @@ class Kohana_Exception extends Exception {
 			// Set the Status code to 500, and Content-Type to text/plain.
 			header('Content-Type: text/plain; charset=utf-8', TRUE, 500);
 
-			echo Kohana_Exception::text($e);
+			echo Elixir_Exception::text($e);
 
 			exit(1);
 		}
@@ -146,7 +145,7 @@ class Kohana_Exception extends Exception {
 	/**
 	 * Logs an exception.
 	 *
-	 * @uses    Kohana_Exception::text
+	 * @uses    Elixir_Exception::text
 	 * @param   Exception  $e
 	 * @param   int        $level
 	 * @return  void
@@ -157,7 +156,7 @@ class Kohana_Exception extends Exception {
 		if (is_object(self::$log))
 		{
 			// Create a text version of the exception
-			$error = Kohana_Exception::text($e);
+			$error = Elixir_Exception::text($e);
 			// Add this exception to the log
 			self::$log->add($level, $error, NULL, array('exception' => $e));
 			// Make sure the logs are written
@@ -182,7 +181,7 @@ class Kohana_Exception extends Exception {
 	/**
 	 * Get a Response object representing the exception
 	 *
-	 * @uses    Kohana_Exception::text
+	 * @uses    Elixir_Exception::text
 	 * @param   Exception  $e
 	 * @return  Response
 	 */
@@ -238,10 +237,10 @@ class Kohana_Exception extends Exception {
 					}
 				}
 
-				if (isset(Kohana_Exception::$php_errors[$code]))
+				if (isset(Elixir_Exception::$php_errors[$code]))
 				{
 					// Use the human-readable error name
-					$code = Kohana_Exception::$php_errors[$code];
+					$code = Elixir_Exception::$php_errors[$code];
 				}
 			}
 
@@ -262,7 +261,7 @@ class Kohana_Exception extends Exception {
 				$trace = array_slice($trace, 0, 2);
 			}
             // Instantiate the error view.
-            $view = Kohana_View::factory(Kohana_Exception::$error_view, get_defined_vars());
+            $view = Elixir_View::factory(Elixir_Exception::$error_view, get_defined_vars());
             return $view->render();
 
 		}
@@ -272,7 +271,7 @@ class Kohana_Exception extends Exception {
 			 * Things are going badly for us, Lets try to keep things under control by
 			 * generating a simpler response object.
 			 */
-            $response = Kohana_Exception::text($e);
+            $response = Elixir_Exception::text($e);
 		}
 
 		return $response;
