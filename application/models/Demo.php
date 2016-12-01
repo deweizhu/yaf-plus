@@ -65,6 +65,10 @@ class DemoModel extends Model implements SplSubject
         return $data;
     }
 
+    /**
+     * ls方法后续操作，输出前对数据做一些东东
+     * @param array $r
+     */
     protected function output(array &$r)
     {
         // TODO: Implement output() method.
