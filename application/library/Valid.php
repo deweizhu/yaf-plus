@@ -4,7 +4,7 @@
  *
  * @package    Elixir
  * @category   Security
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -335,11 +335,11 @@ class Valid {
 	{
 		if ($utf8 === TRUE)
 		{
-			$regex = '/^[-\pL\pN_]++$/uD';
+			$regex = '/^[-\pL\pN_\.]++$/uD';
 		}
 		else
 		{
-			$regex = '/^[-a-z0-9_]++$/iD';
+			$regex = '/^[-a-z0-9_\.]++$/iD';
 		}
 
 		return (bool) preg_match($regex, $str);

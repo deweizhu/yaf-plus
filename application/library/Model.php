@@ -5,7 +5,7 @@
  *
  * @package    Elixir
  * @category   Models
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -99,12 +99,12 @@ abstract class Model
      * @param bool $cache 是否缓存？
      * @return array
      */
-    public function select(array $where, array $fields = NULL, string $order = '', int $limit = 16, int $offset = 0,
+    public function select(array $where, array $fields = NULL, string $order = '', int $limit = 0, int $offset = 0,
                            bool $cache = FALSE): array
     {
         $query = DB::select_array($fields)->from($this->_table);
         $this->where($query, $where);
-        $query->limit($limit)->offset($offset);
+        $limit > 0 and $query->limit($limit)->offset($offset);
         $cache AND $query->cached();
         //排序
         if ($order !== '') {
@@ -171,18 +171,33 @@ abstract class Model
     /**
      * 读一列值
      * @param int $id
-     * @param array|NULL $fields
+     * @param string $fields
      * @param bool $cache 是否缓存？
      * @return array
      */
-    public function get(int $id, string $field, bool $cache = FALSE): string
+    public function get($id, string $field, bool $cache = FALSE): string
     {
-        $query = DB::select(array($field, 'column'))->from($this->_table)->where($this->_primary, '=', $id)->limit(1);
+        $query = DB::select(array($field, 'alias'))->from($this->_table)->where($this->_primary, '=', $id)->limit(1);
         $cache AND $query->cached();
-        $data = $query->execute($this->db)->get('column', '');
+        $data = $query->execute($this->db)->get('alias', '');
         return $data ?: '';
     }
-
+    /**
+     * 读一列值
+     * @param array $where
+     * @param string $fields
+     * @param bool $cache 是否缓存？
+     * @return string
+     */
+    public function get_array($where, string $field, bool $cache = FALSE): string
+    {
+        $query = DB::select_array(array($field, 'alias'))->from($this->_table);
+        $this->where($query, $where);
+        $query->limit(1);
+        $cache AND $query->cached();
+        $data = $query->execute($this->db)->get('alias', '');
+        return $data ?: '';
+    }
     /**
      * 读一行记录
      * @param int $id
@@ -197,7 +212,22 @@ abstract class Model
         $data = $query->execute($this->db)->current();
         return $data ?: array();
     }
-
+    /**
+     * 读一行记录
+     * @param array $where
+     * @param array|NULL $fields
+     * @param bool $cache 是否缓存？
+     * @return array
+     */
+    public function find_array(array $where, array $fields = NULL, bool $cache = FALSE): array
+    {
+        $query = DB::select_array($fields)->from($this->_table);
+        $this->where($query, $where);
+        $query->limit(1);
+        $cache AND $query->cached();
+        $data = $query->execute($this->db)->current();
+        return $data ?: array();
+    }
     /**
      * 插入一条记录
      * @param array $data
@@ -240,13 +270,14 @@ abstract class Model
 
     /**
      * 删除记录
-     * @param int $primary_id
+     * @param array|int $primary_id
      * @return bool
      */
-    public function delete(int $primary_id)
+    public function delete($primary_id): bool
     {
+        $op = is_array($primary_id) ? 'IN' : '=';
         try {
-            DB::delete($this->_table)->where($this->_primary, '=', $primary_id)->execute($this->db);
+            DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
             return TRUE;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
@@ -268,6 +299,22 @@ abstract class Model
         $this->where($query, $where);
         $ret = $query->limit(1)->execute($this->db)->get('1');
         return $ret ? TRUE : FALSE;
+    }
+
+    /**
+     * 根据ID拷贝一份
+     *
+     * @param int $id 主键ID
+     * @param array $data 覆盖字段值
+     * @return int
+     */
+    public function copy_by_id(int $id, array $data = NULL): int
+    {
+        $r = $this->find($id);
+        if (!$r) return 0;
+        unset($r[$this->_primary]);
+        if ($data) $r = array_merge($r, $data);
+        return $this->insert($r);
     }
 
     /**
