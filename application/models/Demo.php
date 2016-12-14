@@ -11,25 +11,48 @@ class DemoModel extends Model implements SplSubject
 
     protected $_table = 'users';
     protected $_primary = 'userid';
-
+    //TODO::临时字段，请随意修改
+    protected $_fields = array(
+        'user_id',
+        'group_id',
+        'name',
+        'fullname',
+        'gender',
+        'email',
+        'mobile',
+        'birthday',
+        'birthday_type',
+        'register_ip',
+        'point',
+        'disabled',
+        'created',
+        'updated',
+    );
+    protected $_create_autofill = array('created' => TIMENOW, 'updated' => 0);
+    protected $_update_autofill = array('updated' => TIMENOW);
+    protected $_readonly = array('user_id', 'created');
     /**
      * 事件通知
+     *
      * @var null
      */
     public $event = NULL;
     /**
      * 事件通知传递的数据
+     *
      * @var null
      */
     public $data = NULL;
     /**
      * 事件通知服务
+     *
      * @var null
      */
     private $_observers = NULL;
 
     /**
      * DemoModel constructor.
+     *
      * @param array $fields
      */
     public function __construct()
@@ -39,14 +62,32 @@ class DemoModel extends Model implements SplSubject
         $this->attach(new ObserverPlugin(__CLASS__));
     }
 
+    /**
+     * 新增
+     * @param array $data
+     *
+     * @return int
+     */
+    public function insert(array $data): int
+    {
+        if (isset($data['name']))
+            $data['name'] = preg_replace('#([\s]+)#is', '', $data['name']);
+        if (empty($data['name'])) {
+            $this->error_message = '名称不能为空';
+            return 0;
+        }
+        return parent::insert($data);
+    }
 
     /**
-     * 获取内容列表
-     * @param array $where 检索条件
-     * @param array $fields 列出字段
-     * * @param string $order 排序方式
-     * @param int $page 当前页码
-     * @param int $page_size 每页数量
+     * 列表
+     *
+     * @param array $where     检索条件
+     * @param array $fields    列出字段
+     *                         * @param string $order 排序方式
+     * @param int   $page      当前页码
+     * @param int   $page_size 每页数量
+     *
      * @return array
      */
     public function ls(array $where, array $fields = NULL, string $order = '', int $page = 1, int $page_size = 16): array
@@ -67,6 +108,7 @@ class DemoModel extends Model implements SplSubject
 
     /**
      * ls方法后续操作，输出前对数据做一些东东
+     *
      * @param array $r
      */
     protected function output(array &$r)
@@ -74,23 +116,10 @@ class DemoModel extends Model implements SplSubject
         // TODO: Implement output() method.
     }
 
-    /**
-     * [私有]查询条件
-     * @param Database_Query_Builder_Select $where
-     * @param array $option
-     */
-    private function _where(Database_Query_Builder_Select &$query, array $option)
-    {
-        if (!$option)
-            return;
-        if (isset($option['keywords']) && $option['keywords']) {
-            $query->where(DB::expr('INSTR(`title`, ?1)', ['?1' => $option['keywords']]), '>', 0);
-        }
-        return;
-    }
 
     /**
      * 添加 observer
+     *
      * @param SplObserver $observer
      */
     public function attach(SplObserver $observer)
@@ -100,6 +129,7 @@ class DemoModel extends Model implements SplSubject
 
     /**
      * 移除 observer
+     *
      * @param SplObserver $observer
      */
     public function detach(SplObserver $observer)
