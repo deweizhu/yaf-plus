@@ -721,7 +721,7 @@ abstract class Elixir_Database
         $table = $this->quote_table($table);
         $offset = $page > 1 ? ($page - 1) * $size : 0;
         $sql = 'SELECT ' . $fields . ' FROM ' . $table . $where . ($order ? ' ORDER BY ' . $order : '') .
-            ' LIMIT ' . $offset . ' OFFSET ' . $offset;
+            ' LIMIT ' . $size . ' OFFSET ' . $offset;
         return $this->query(Database::SELECT, $sql)->result();
     }
 
