@@ -37,8 +37,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 
         //Cookie 设置
         $config = Yaf_Application::app()->getConfig();
-        Cookie::$salt = $config->get('cookie.salt');
-        Cookie::$domain = $config->get('cookie.salt');
+        if ($cookie = $config->get('cookie')) {
+            Cookie::$salt = $cookie->get('salt') ?: '123456';
+            Cookie::$path = $cookie->get('path') ?: '/';
+        }
         Cache::$default = $config->get('cache.default');
     }
 
