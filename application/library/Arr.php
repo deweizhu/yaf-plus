@@ -4,7 +4,7 @@
  *
  * @package    Elixir
  * @category   Helpers
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -628,4 +628,371 @@ class Arr {
 		return $flat;
 	}
 
+	/**
+	 * 函数向数组中添加一个键-值对（如果给定的键不存在）
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @param  mixed   $value
+	 * @return array
+	 */
+	public static function add($array, $key, $value)
+	{
+	    if (is_null(static::get($array, $key))) {
+	        static::set($array, $key, $value);
+	    }
+	
+	    return $array;
+	}
+	
+	/**
+	 * Build a new array using a callback.
+	 *
+	 * @param  array  $array
+	 * @param  callable  $callback
+	 * @return array
+	 */
+	public static function build(array $array, callable $callback):array
+	{
+	    $results = [];
+	
+	    foreach ($array as $key => $value) {
+	        list($innerKey, $innerValue) = call_user_func($callback, $key, $value);
+	
+	        $results[$innerKey] = $innerValue;
+	    }
+	
+	    return $results;
+	}
+	
+	/**
+	 * 多维数组转换成一位数组
+	 *
+	 * @param  array  $array
+	 * @return array
+	 */
+	public static function collapse(array $array):array
+	{
+	    $results = [];
+	
+	    foreach ($array as $values) {
+	        $results = array_merge($results, $values);
+	    }
+	
+	    return $results;
+	}
+	
+	/**
+	 * 返回两个数组，一个包含原数组的所有键，另一个包含原数组的所有值：
+	 *
+	 * @param  array  $array
+	 * @return array
+	 */
+	public static function divide(array $array):array
+	{
+	    return [array_keys($array), array_values($array)];
+	}
+	
+	/**
+	 * 函数将一个多维数组转换为一维数组，并使用点号指示深度
+	 * 例：$array = array_dot(['foo' => ['bar' => 'baz']]); // ['foo.bar' => 'baz'];
+	 *
+	 * @param  array   $array
+	 * @param  string  $prepend
+	 * @return array
+	 */
+	public static function dot($array, $prepend = '')
+	{
+	    $results = [];
+	
+	    foreach ($array as $key => $value) {
+	        if (is_array($value)) {
+	            $results = array_merge($results, static::dot($value, $prepend.$key.'.'));
+	        } else {
+	            $results[$prepend.$key] = $value;
+	        }
+	    }
+	
+	    return $results;
+	}
+	
+	/**
+	 * 方法从一个数组中移除指定的键/值对：
+	 *
+	 * @param  array  $array
+	 * @param  array|string  $keys
+	 * @return array
+	 */
+	public static function except(array $array, $keys):array
+	{
+	    static::forget($array, $keys);
+	
+	    return $array;
+	}
+	
+	/**
+	 * Fetch a flattened array of a nested array element.
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @return array
+	 *
+	 * @deprecated since version 5.1. Use pluck instead.
+	 */
+	public static function fetch($array, $key)
+	{
+	    foreach (explode('.', $key) as $segment) {
+	        $results = [];
+	
+	        foreach ($array as $value) {
+	            if (array_key_exists($segment, $value = (array) $value)) {
+	                $results[] = $value[$segment];
+	            }
+	        }
+	
+	        $array = array_values($results);
+	    }
+	
+	    return array_values($results);
+	}
+	
+	/**
+	 * 方法返回数组中第一个通过判断返回为真的元素：
+	 *
+	 * @param  array  $array
+	 * @param  callable  $callback
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	public static function first($array, callable $callback, $default = null)
+	{
+	    foreach ($array as $key => $value) {
+	        if (call_user_func($callback, $key, $value)) {
+	            return $value;
+	        }
+	    }
+	
+	    return value($default);
+	}
+	
+	/**
+	 * 法返回数组中最后一个通过判断返回为真的元素
+	 *
+	 * @param  array  $array
+	 * @param  callable  $callback
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	public static function last($array, callable $callback, $default = null)
+	{
+	    return static::first(array_reverse($array), $callback, $default);
+	}
+	
+	/**
+	 *  方法基于点号路径从一个深度嵌套的数组中移除指定的键/值对：
+	 *  
+	 * @param  array  $array
+	 * @param  array|string  $keys
+	 * @return void
+	 */
+	public static function forget(&$array, $keys)
+	{
+	    $original = &$array;
+	
+	    $keys = (array) $keys;
+	
+	    if (count($keys) === 0) {
+	        return;
+	    }
+	
+	    foreach ($keys as $key) {
+	        $parts = explode('.', $key);
+	
+	        while (count($parts) > 1) {
+	            $part = array_shift($parts);
+	
+	            if (isset($array[$part]) && is_array($array[$part])) {
+	                $array = &$array[$part];
+	            } else {
+	                $parts = [];
+	            }
+	        }
+	
+	        unset($array[array_shift($parts)]);
+	
+	        // clean up after each pass
+	        $array = &$original;
+	    }
+	}
+	
+	/**
+	 * 数组包含
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @return bool
+	 */
+	public static function has(array $array, string $key):bool
+	{
+	    if (empty($array) || is_null($key)) {
+	        return false;
+	    }
+	
+	    if (array_key_exists($key, $array)) {
+	        return true;
+	    }
+	
+	    foreach (explode('.', $key) as $segment) {
+	        if (! is_array($array) || ! array_key_exists($segment, $array)) {
+	            return false;
+	        }
+	
+	        $array = $array[$segment];
+	    }
+	
+	    return true;
+	}
+	
+	/**
+	 * Get a subset of the items from the given array.
+	 *
+	 * @param  array  $array
+	 * @param  array|string  $keys
+	 * @return array
+	 */
+	public static function only($array, $keys)
+	{
+	    return array_intersect_key($array, array_flip((array) $keys));
+	}
+	
+	/**
+	 * Explode the "value" and "key" arguments passed to "pluck".
+	 *
+	 * @param  string|array  $value
+	 * @param  string|array|null  $key
+	 * @return array
+	 */
+	protected static function explodePluckParameters($value, $key)
+	{
+	    $value = is_string($value) ? explode('.', $value) : $value;
+	
+	    $key = is_null($key) || is_array($key) ? $key : explode('.', $key);
+	
+	    return [$value, $key];
+	}
+	
+	/**
+	 * Push an item onto the beginning of an array.
+	 *
+	 * @param  array  $array
+	 * @param  mixed  $value
+	 * @param  mixed  $key
+	 * @return array
+	 */
+	public static function prepend($array, $value, $key = null)
+	{
+	    if (is_null($key)) {
+	        array_unshift($array, $value);
+	    } else {
+	        $array = [$key => $value] + $array;
+	    }
+	
+	    return $array;
+	}
+	
+	/**
+	 * Get a value from the array, and remove it.
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @param  mixed   $default
+	 * @return mixed
+	 */
+	public static function pull(&$array, $key, $default = null)
+	{
+	    $value = static::get($array, $key, $default);
+	
+	    static::forget($array, $key);
+	
+	    return $value;
+	}
+	
+	/**
+	 * Set an array item to a given value using "dot" notation.
+	 *
+	 * If no key is given to the method, the entire array will be replaced.
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @param  mixed   $value
+	 * @return array
+	 */
+	public static function set(&$array, $key, $value)
+	{
+	    if (is_null($key)) {
+	        return $array = $value;
+	    }
+	
+	    $keys = explode('.', $key);
+	
+	    while (count($keys) > 1) {
+	        $key = array_shift($keys);
+	
+	        // If the key doesn't exist at this depth, we will just create an empty array
+	        // to hold the next value, allowing us to create the arrays to hold final
+	        // values at the correct depth. Then we'll keep digging into the array.
+	        if (! isset($array[$key]) || ! is_array($array[$key])) {
+	            $array[$key] = [];
+	        }
+	
+	        $array = &$array[$key];
+	    }
+	
+	    $array[array_shift($keys)] = $value;
+	
+	    return $array;
+	}
+	
+	/**
+	 * Recursively sort an array by keys and values.
+	 *
+	 * @param  array  $array
+	 * @return array
+	 */
+	public static function sortRecursive($array)
+	{
+	    foreach ($array as &$value) {
+	        if (is_array($value)) {
+	            $value = static::sortRecursive($value);
+	        }
+	    }
+	
+	    if (static::isAssoc($array)) {
+	        ksort($array);
+	    } else {
+	        sort($array);
+	    }
+	
+	    return $array;
+	}
+	
+	/**
+	 * Filter the array using the given callback.
+	 *
+	 * @param  array  $array
+	 * @param  callable  $callback
+	 * @return array
+	 */
+	public static function where($array, callable $callback)
+	{
+	    $filtered = [];
+	
+	    foreach ($array as $key => $value) {
+	        if (call_user_func($callback, $key, $value)) {
+	            $filtered[$key] = $value;
+	        }
+	    }
+	
+	    return $filtered;
+	}
 }

@@ -49,7 +49,24 @@ abstract class Model
      */
     protected $_update_autofill = array();
 
-
+    /**
+     * 软删除
+     * @var string $softDelete
+     */
+    protected $softDelete = FALSE;
+    
+    /**
+     * 软删除字段
+     * @var string
+     */
+    protected $softDeleteField = 'deleted_at';
+    
+    /**
+     * 模型是否存在
+     * @var bool
+     */
+    protected $_exists = FALSE;
+    
     /**
      * 插入时，准备好的数据
      *
@@ -87,6 +104,8 @@ abstract class Model
 
         return new $class;
     }
+
+
 
 
     /**
@@ -149,7 +168,9 @@ abstract class Model
         $this->pagination = Pagination::factory($page, $count_items, $size);
         if ($this->pagination->count_items <= 0)
             return [];
-        return $this->select($where, $fields, $order, $this->pagination->items_per_page, $this->pagination->items_offset, $cache);
+        $data = $this->select($where, $fields, $order, $this->pagination->items_per_page, $this->pagination->items_offset, $cache);
+        
+        return ['data'=>$data,'pager'=>$this->pagination];
     }
 
     /**
@@ -269,6 +290,21 @@ abstract class Model
     }
 
     /**
+     * Run the save method on the model
+     *
+     * @param array $option
+     * @return boolean
+     */
+    public function save(array $option):bool
+    {
+        if($this->_exists) {
+            return $this->insert($option) > 0 ? TRUE : FALSE;
+        } else {
+            return $this->update($option, $this[$this->_primary]);
+        }
+    }
+    
+    /**
      * 删除记录
      * @param array|int $primary_id
      * @return bool
@@ -277,7 +313,11 @@ abstract class Model
     {
         $op = is_array($primary_id) ? 'IN' : '=';
         try {
-            DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
+        	if($this->softDelete) {
+                DB::update($this->_table)->set([$this->softDeleteField=>time()])->where($this->_primary,$op,$primary_id)->execute($this->db);
+            } else {
+                DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
+            }
             return TRUE;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();

@@ -4,9 +4,9 @@
  *
  * @package    Elixir/Database
  * @category   Query
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license
+ * @license
  */
 abstract class Database_Query_Builder_Where extends Database_Query_Builder {
 

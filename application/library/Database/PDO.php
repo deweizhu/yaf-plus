@@ -4,9 +4,9 @@
  *
  * @package    Elixir/Database
  * @category   Drivers
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license
+ * @license
  */
 class Database_PDO extends Database {
 
@@ -137,7 +137,11 @@ class Database_PDO extends Database {
 
 		try
 		{
-			$result = $this->_connection->query($sql);
+		    if($as_object == false && isset($params)) {
+			  $sth = $this->_connection->prepare($sql);
+		    } else {
+		       $sth = $this->_connection->query($sql);
+		    }
 		}
 		catch (Exception $e)
 		{
@@ -152,24 +156,28 @@ class Database_PDO extends Database {
 
 		// Set the last query
 		$this->last_query = $sql;
+		
+		if($as_object == false && isset($params)) {
+		    $sth->execute($params);
+		}
 
 		if ($type === Database::SELECT)
 		{
 			// Convert the result into an array, as PDOStatement::rowCount is not reliable
 			if ($as_object === FALSE)
 			{
-				$result->setFetchMode(PDO::FETCH_ASSOC);
+				$sth->setFetchMode(PDO::FETCH_ASSOC);
 			}
 			elseif (is_string($as_object))
 			{
-				$result->setFetchMode(PDO::FETCH_CLASS, $as_object, $params);
+				$sth->setFetchMode(PDO::FETCH_CLASS, $as_object, $params);
 			}
 			else
 			{
-				$result->setFetchMode(PDO::FETCH_CLASS, 'stdClass');
+				$sth->setFetchMode(PDO::FETCH_CLASS, 'stdClass');
 			}
 
-			 $result = $result->fetchAll();
+			 $result = $sth->fetchAll();
 
 			// Return an iterator of results
 			return new Database_Result_Cached($result, $sql, $as_object, $params);
@@ -179,13 +187,13 @@ class Database_PDO extends Database {
 			// Return a list of insert id and rows created
 			return array(
 				$this->_connection->lastInsertId(),
-				$result->rowCount(),
+				$sth->rowCount(),
 			);
 		}
 		else
 		{
 			// Return the number of rows affected
-			return $result->rowCount();
+			return $sth->rowCount();
 		}
 	}
 

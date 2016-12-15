@@ -4,9 +4,9 @@
  *
  * @package    Elixir/Database
  * @category   Query
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license
+ * @license
  */
 class Database_Query_Builder_Delete extends Database_Query_Builder_Where {
 
