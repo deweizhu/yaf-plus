@@ -269,8 +269,9 @@ abstract class Elixir_Database
     {
         // Quote the table name
         $table = $this->quote_table($table);
-        return $this->query(Database::SELECT, 'SELECT COUNT(*) AS total_row_count FROM ' . $table . $where, FALSE)
-            ->get('total_row_count') ?: 0;
+        $total_row_count = $this->query(Database::SELECT, 'SELECT COUNT(*) AS total_row_count FROM ' . $table . $where, FALSE)
+            ->get('total_row_count');
+        return  $total_row_count ? intval($total_row_count): 0;
     }
 
     /**

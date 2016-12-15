@@ -147,8 +147,7 @@ class Pagination
                 'items_per_page' => isset($args[3]) ? (int)$args[3] : $model->items_per_page,
             );
             $settings = array_merge($settings, $group);
-        }
-        else if ($num_args === 3) {
+        } else if ($num_args === 3) {
             $settings = array(
                 'current_page'   => isset($args[0]) ? (int)$args[0] : $model->current_page,
                 'count_items'    => isset($args[1]) ? (int)$args[1] : $model->count_items,
@@ -156,8 +155,7 @@ class Pagination
             );
             $model->_create($settings);
             $settings = array_merge($settings, $group);
-        }
-        else {
+        } else {
             return NULL;
         }
 
@@ -169,34 +167,37 @@ class Pagination
         return $model;
     }
 
+
     /**
-     * 计算分页大小
-     * @param array $filter
+     * 计算分页
+     *
+     * @param int  $page         页码
+     * @param int  $size         每页大小
+     * @param int  $record_count 总数
+     * @param bool $more         是否有更多
+     *
      * @return array
      */
-    public static function buildPageSize(array &$filter) : array
+    public static function buildPageSize(int $page, int $size, int $record_count, bool $more = TRUE): array
     {
-        if (!isset($filter['record_count']))
-            return [];
-        if (Cookie::get('page_size') !== NULL) {
-            $filter['page_size'] = intval(Cookie::get('page_size'));
-        } else {
-            $filter['page_size'] = !isset($filter['page_size']) ? 10 : intval($filter['page_size']);
-        }
-        $filter['page'] = max(1, $filter['page']);
-        $filter['record_count'] = intval($filter['record_count']);
-        $filter['page_count'] = $filter['record_count'] > 0 ? ceil($filter['record_count'] / $filter['page_size']) : 1;
+        $ret = array('page' => $page, 'size' => $size, 'record_count' => $record_count, 'more' => 0);
+        if ($record_count <= 0 || $page <= 0)
+            return $ret;
+        $ret['page'] = max(1, $page);
+        $ret['page_count'] = $record_count > 0 ? ceil($record_count / $size) : 1;
         /* 边界处理 */
-        if ($filter['page'] > $filter['page_count']) {
-            $filter['page'] = $filter['page_count'];
-            $filter['record_count'] = 0;
+        if ($ret['page'] > $ret['page_count']) {
+            $ret['page'] = $ret['page_count'];
+            $ret['record_count'] = 0;
         }
-        $filter['offset'] = ($filter['page'] - 1) * $filter['page_size'];
-        return $filter;
+        if ($more)
+            $ret['more'] = ($page * $size) < $record_count ? 1 : 0;
+        return $ret;
     }
 
     /**
      * 创建页码
+     *
      * @return
      */
     private function _create(array &$d)
@@ -219,8 +220,10 @@ class Pagination
 
     /**
      * Getter
+     *
      * @param string $var variable
-     * @param mixed $default
+     * @param mixed  $default
+     *
      * @return mixed
      */
     public function get($var, $default = NULL)
@@ -236,8 +239,8 @@ class Pagination
     public function view_list_item($html, array $li_params = array())
     {
         return ($this->show_in_list
-            ? "<li" . HTML::attributes($li_params) . ">"
-            : "") . $html . ($this->show_in_list ? "</li>" : "");
+                ? "<li" . HTML::attributes($li_params) . ">"
+                : "") . $html . ($this->show_in_list ? "</li>" : "");
     }
 
     public function view_first()
