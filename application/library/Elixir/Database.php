@@ -13,9 +13,9 @@
  *
  * @package    Elixir/Database
  * @category   Base
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license
+ * @license
  */
 abstract class Elixir_Database
 {
@@ -609,8 +609,7 @@ abstract class Elixir_Database
         }
 
         if (isset($alias)) {
-            // Attach table prefix to alias
-            $table .= ' AS ' . $this->_identifier . $this->table_prefix() . $alias . $this->_identifier;
+            $table .= ' AS ' . $this->_identifier  . $alias . $this->_identifier;
         }
 
         return $table;
@@ -720,10 +719,10 @@ abstract class Elixir_Database
     {
         // Quote the table name
         $table = $this->quote_table($table);
-        $offset = ($page - 1) * $size;
+        $offset = $page > 1 ? ($page - 1) * $size : 0;
         $sql = 'SELECT ' . $fields . ' FROM ' . $table . $where . ($order ? ' ORDER BY ' . $order : '') .
             ' LIMIT ' . $offset . ' OFFSET ' . $offset;
-        return $this->query(Database::SELECT, $sql, FALSE, FALSE)->result();
+        return $this->query(Database::SELECT, $sql)->result();
     }
 
 } // End Database_Connection
