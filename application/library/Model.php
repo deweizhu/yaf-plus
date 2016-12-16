@@ -210,7 +210,7 @@ abstract class Model
      * @param bool $cache 是否缓存？
      * @return string
      */
-    public function get_array($where, string $field, bool $cache = FALSE): string
+    public function get_by($where, string $field, bool $cache = FALSE): string
     {
         $query = DB::select_array(array($field, 'alias'))->from($this->_table);
         $this->where($query, $where);
@@ -240,7 +240,7 @@ abstract class Model
      * @param bool $cache 是否缓存？
      * @return array
      */
-    public function find_array(array $where, array $fields = NULL, bool $cache = FALSE): array
+    public function find_by(array $where, array $fields = NULL, bool $cache = FALSE): array
     {
         $query = DB::select_array($fields)->from($this->_table);
         $this->where($query, $where);
@@ -338,6 +338,18 @@ abstract class Model
         $query = DB::select(DB::expr('1'))->from($this->_table);
         $this->where($query, $where);
         $ret = $query->limit(1)->execute($this->db)->get('1');
+        return $ret ? TRUE : FALSE;
+    }
+
+    /**
+     * 是否存在符合条件的ID？
+     * @param int $primary_id 主键ID
+     *
+     * @return bool
+     */
+    public function exists_id(int $primary_id): bool
+    {
+        $ret = DB::select(DB::expr('1'))->from($this->_table)->where($this->_primary, '=', $primary_id)->limit(1)->execute($this->db)->get('1');
         return $ret ? TRUE : FALSE;
     }
 
