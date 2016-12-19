@@ -78,8 +78,8 @@ abstract class Elixir_Database
                 'password'   => $config->password,
                 'persistent' => $config->persistent,
             );
-
             $_config['table_prefix'] = $config->table_prefix;
+            $_config['dbname'] = $config->dbname;
             // Set the driver class name
             $driver = 'Database_' . ucfirst($_config['type']);
             // Create the database connection instance
@@ -426,6 +426,18 @@ abstract class Elixir_Database
     public function table_prefix(): string
     {
         return $this->_config['table_prefix'];
+    }
+
+    /**
+     * 返回当前配置的数据库名称
+     *
+     *     $db_name = $db->db_name();
+     *
+     * @return  string
+     */
+    public function db_name(): string
+    {
+        return $this->_config['dbname'];
     }
 
     /**

@@ -4,64 +4,38 @@
  * password hashing.
  *
  * @package    Elixir/Auth
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
 abstract class Elixir_Auth {
 
-	// Auth instances
-	protected static $_instance;
-
-	/**
-	 * Singleton pattern
-	 *
-	 * @return Auth
-	 */
-	public static function instance()
-	{
-		if ( ! isset(Auth::$_instance))
-		{
-			// Load the configuration for this type
-            $config = Yaf_Application::app()->getConfig()->get('auth');
-			if ( ! $type = $config->get('driver'))
-			{
-				$type = 'file';
-			}
-
-			// Set the session class name
-			$class = 'Auth_'.ucfirst($type);
-
-			// Create a new session instance
-			Auth::$_instance = new $class($config);
-		}
-
-		return Auth::$_instance;
-	}
-
 	protected $_session;
 
 	protected $_config;
 
+	protected $name;
 	/**
 	 * Loads Session and configuration options.
 	 *
 	 * @param   array  $config  Config Options
 	 * @return  void
 	 */
-	public function __construct($config = array())
+	public function __construct($config = array(),$name)
 	{
 		// Save the config in the object
 		$this->_config = $config;
+		
+        $this->name = $name;		
 
 		$this->_session = Session::instance($this->_config['session_type']);
 	}
 
-	abstract protected function _login($username, $password, $remember);
+	abstract protected function _login(array $credentials, bool $remember);
 
-	abstract public function password($username);
+	abstract public function password(array $credentials);
 
-	abstract public function check_password($password);
+	abstract public function check_password(string $password);
 
 	/**
 	 * Gets the currently logged in user from the session.
@@ -70,9 +44,9 @@ abstract class Elixir_Auth {
 	 * @param   mixed  $default  Default value to return if the user is currently not logged in.
 	 * @return  mixed
 	 */
-	public function get_user($default = NULL)
+	public function get($default = NULL)
 	{
-		return $this->_session->get($this->_config['session_key'], $default);
+		return $this->_session->get($this->getName(), $default);
 	}
 
 	/**
@@ -83,12 +57,12 @@ abstract class Elixir_Auth {
 	 * @param   boolean  $remember  Enable autologin
 	 * @return  boolean
 	 */
-	public function login($username, $password, $remember = FALSE)
+	public function login(array $credentials, bool $remember = FALSE)
 	{
-		if (empty($password))
+		if (!array_has($credentials, 'password'))
 			return FALSE;
 
-		return $this->_login($username, $password, $remember);
+		return $this->_login($credentials, $remember);
 	}
 
 	/**
@@ -108,7 +82,7 @@ abstract class Elixir_Auth {
 		else
 		{
 			// Remove the user from the session
-			$this->_session->delete($this->_config['session_key']);
+			$this->_session->delete($this->getName());
 
 			// Regenerate session_id
 			$this->_session->regenerate();
@@ -127,7 +101,7 @@ abstract class Elixir_Auth {
 	 */
 	public function logged_in($role = NULL)
 	{
-		return ($this->get_user() !== NULL);
+		return ($this->get() !== NULL);
 	}
 
 	/**
@@ -162,9 +136,18 @@ abstract class Elixir_Auth {
 		$this->_session->regenerate();
 
 		// Store username in session
-		$this->_session->set($this->_config['session_key'], $user);
+		$this->_session->set($this->getName(), $user);
 
 		return TRUE;
+	}
+	
+	/**
+	 * Get a unique identifier for the auth session value.
+	 * @return string
+	 */
+	public function getName()
+	{
+	    return 'login_'.$this->name.'_'.md5(get_class($this));
 	}
 
 } // End Auth

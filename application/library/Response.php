@@ -8,13 +8,11 @@ class Response
     /**
      *   生成JSON格式的正确消息
      *
-     * @access  public
-     *
-     * @param
-     *
-     * @return  void
+     * @param string|array $content
+     * @param string       $message
+     * @param array        $append
      */
-    public static function jsonResult($content, $message = '', $append = array())
+    public static function jsonResult($content, string $message = '', array $append = array())
     {
         self::jsonResponse($content, 0, $message, $append);
     }
@@ -22,33 +20,27 @@ class Response
     /**
      * 创建一个JSON格式的错误信息
      *
-     * @access  public
-     *
-     * @param   string $msg
-     *
-     * @return  void
+     * @param string $msg
      */
-    public static function jsonError($msg)
+    public static function jsonError(string $msg, array $append = array())
     {
-        self::jsonResponse('', 1, $msg);
+        self::jsonResponse('', 1, $msg, $append);
     }
 
     /**
      * 创建一个JSON格式的数据
      *
-     * @access  public
-     *
-     * @param   string  $content
-     * @param   integer $error
-     * @param   string  $message
-     * @param   array   $append
+     * @param   string|array $content
+     * @param   int          $error
+     * @param   string       $message
+     * @param   array        $append
      *
      * @return  void
      */
-    private static function jsonResponse($content = '', $error = "0", $message = '', $append = array())
+    private static function jsonResponse($content = '', int $error = 0, string $message = '', array $append = array())
     {
-
-        $res = array('error' => $error, 'message' => $message, 'content' => $content);
+        $res = array('error' => $error, 'message' => $message);
+        if ($error !== 1) $res['content'] = $content;
         if (!empty($append)) {
             foreach ($append AS $key => $val) {
                 $res[$key] = $val;
@@ -58,10 +50,8 @@ class Response
         //Jquery + Zeptojs jsonp
         if (isset($_GET['jsoncallback'])) {
             $val = $_GET['jsoncallback'] . '(' . $val . ')';
-            exit($val);
         } elseif (isset($_GET['callback'])) {
             $val = $_GET['callback'] . '(' . $val . ')';
-            exit($val);
         }
         exit($val);
     }
@@ -69,7 +59,7 @@ class Response
     /**
      *  API接口：生成JSON格式的正确消息
      *
-     * @param array $data 数据
+     * @param array  $data 数据
      * @param string $msg  提示消息
      * @param array  $append
      */
@@ -81,12 +71,12 @@ class Response
     /**
      *  API接口：创建一个JSON格式的错误信息
      *
-     * @param int $error 错误代码
+     * @param int    $error 错误代码
      * @param string $msg   提示消息
      */
     public static function apiJsonError(int $error, string $msg)
     {
-         self::apiJsonResponse([], $error, $msg);
+        self::apiJsonResponse([], $error, $msg);
     }
 
     /**
@@ -95,8 +85,8 @@ class Response
      * @access  public
      *
      * @param   array  $data
-     * @param   int $error
-     * @param   string  $msg
+     * @param   int    $error
+     * @param   string $msg
      *
      * @return  void
      */

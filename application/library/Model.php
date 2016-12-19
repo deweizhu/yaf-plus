@@ -3,9 +3,9 @@
 /**
  * Model base class. All models should extend this class.
  *
- * @package    Elixir
- * @category   Models
- * @author    知名不具
+ * @package        Elixir
+ * @category       Models
+ * @author         知名不具
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -14,16 +14,19 @@ abstract class Model
 
     /**
      * 表名
+     *
      * @var string
      */
     protected $_table = '';
     /**
      * 表主键
+     *
      * @var string
      */
     protected $_primary = 'id';
     /**
      * 表字段
+     *
      * @var array
      */
     protected $_fields = array();
@@ -51,22 +54,25 @@ abstract class Model
 
     /**
      * 软删除
+     *
      * @var string $softDelete
      */
     protected $softDelete = FALSE;
-    
+
     /**
      * 软删除字段
+     *
      * @var string
      */
     protected $softDeleteField = 'deleted_at';
-    
+
     /**
      * 模型是否存在
+     *
      * @var bool
      */
     protected $_exists = FALSE;
-    
+
     /**
      * 插入时，准备好的数据
      *
@@ -80,6 +86,7 @@ abstract class Model
 
     /**
      * 分页
+     *
      * @var null
      */
     protected $pagination = NULL;
@@ -95,6 +102,7 @@ abstract class Model
      *     $model = Model::factory($name);
      *
      * @param   string $name model name
+     *
      * @return  Model
      */
     public static function factory($name): Model
@@ -106,16 +114,16 @@ abstract class Model
     }
 
 
-
-
     /**
      * 查询多条记录
-     * @param array $where 查询条件
-     * @param array $fields 字段
-     * @param string $order 排序
-     * @param int $limit 数量
-     * @param int $offset 偏移量
-     * @param bool $cache 是否缓存？
+     *
+     * @param array  $where  查询条件
+     * @param array  $fields 字段
+     * @param string $order  排序
+     * @param int    $limit  数量
+     * @param int    $offset 偏移量
+     * @param bool   $cache  是否缓存？
+     *
      * @return array
      */
     public function select(array $where, array $fields = NULL, string $order = '', int $limit = 0, int $offset = 0,
@@ -141,7 +149,7 @@ abstract class Model
         }
         $data = $query->execute($this->db)->result();
         if (!$data) {
-            $this->error = 'nothing.';
+            $this->error_message = 'nothing.';
             return [];
         }
         $this->_after_select($data, TRUE);
@@ -150,16 +158,18 @@ abstract class Model
 
     /**
      * 分页
-     * @param array $where 查询条件
-     * @param array $fields 字段
-     * @param string $order 排序
-     * @param int $page 页码
-     * @param int $size 每页数量
-     * @param bool $cache 是否缓存查询结果？
+     *
+     * @param array  $where  查询条件
+     * @param array  $fields 字段
+     * @param string $order  排序
+     * @param int    $page   页码
+     * @param int    $size   每页数量
+     * @param bool   $cache  是否缓存查询结果？
+     *
      * @return array
      */
     public function paging(array $where = NULL, array $fields = NULL, string $order = '', int $page = 1, int $size = 16,
-                         bool $cache = FALSE): array
+                           bool $cache = FALSE): array
     {
         static $count_items = 0;
         if ($count_items === 0) {
@@ -169,15 +179,38 @@ abstract class Model
         if ($this->pagination->count_items <= 0)
             return [];
         $data = $this->select($where, $fields, $order, $this->pagination->items_per_page, $this->pagination->items_offset, $cache);
-        
-        return ['data'=>$data,'pager'=>$this->pagination];
+
+        return ['data' => $data, 'pager' => $this->pagination];
+    }
+
+    /**
+     * 查询所有记录
+     *
+     * @param array $where  查询条件
+     * @param array $fields 字段
+     * @param bool  $cache  是否缓存？
+     *
+     * @return array
+     */
+    public function fetchAll(array $where = NULL, array $fields = NULL, bool $cache = TRUE): array
+    {
+        $query = DB::select_array($fields)->from($this->_table);
+        $this->where($query, $where);
+        $cache AND $query->cached();
+        $result = $query->execute($this->db)->result();
+        if (!$result) {
+            $this->error_message = 'nothing.';
+            return [];
+        }
+        return $result;
     }
 
     /**
      * 获取总数
      *
      * @param array $where
-     * @param bool $cache 是否缓存查询结果？
+     * @param bool  $cache 是否缓存查询结果？
+     *
      * @return int
      */
     public function count_records(array $where = NULL, bool $cache = FALSE): int
@@ -191,9 +224,11 @@ abstract class Model
 
     /**
      * 读一列值
-     * @param int $id
+     *
+     * @param int    $id
      * @param string $fields
-     * @param bool $cache 是否缓存？
+     * @param bool   $cache 是否缓存？
+     *
      * @return array
      */
     public function get($id, string $field, bool $cache = FALSE): string
@@ -203,11 +238,14 @@ abstract class Model
         $data = $query->execute($this->db)->get('alias', '');
         return $data ?: '';
     }
+
     /**
      * 读一列值
-     * @param array $where
+     *
+     * @param array  $where
      * @param string $fields
-     * @param bool $cache 是否缓存？
+     * @param bool   $cache 是否缓存？
+     *
      * @return string
      */
     public function get_by($where, string $field, bool $cache = FALSE): string
@@ -219,11 +257,14 @@ abstract class Model
         $data = $query->execute($this->db)->get('alias', '');
         return $data ?: '';
     }
+
     /**
      * 读一行记录
-     * @param int $id
+     *
+     * @param int        $id
      * @param array|NULL $fields
-     * @param bool $cache 是否缓存？
+     * @param bool       $cache 是否缓存？
+     *
      * @return array
      */
     public function find(int $id, array $fields = NULL, bool $cache = FALSE): array
@@ -233,11 +274,14 @@ abstract class Model
         $data = $query->execute($this->db)->current();
         return $data ?: array();
     }
+
     /**
      * 读一行记录
-     * @param array $where
+     *
+     * @param array      $where
      * @param array|NULL $fields
-     * @param bool $cache 是否缓存？
+     * @param bool       $cache 是否缓存？
+     *
      * @return array
      */
     public function find_by(array $where, array $fields = NULL, bool $cache = FALSE): array
@@ -249,9 +293,12 @@ abstract class Model
         $data = $query->execute($this->db)->current();
         return $data ?: array();
     }
+
     /**
      * 插入一条记录
+     *
      * @param array $data
+     *
      * @return integer  新记录ID
      */
     public function insert(array $data): int
@@ -262,6 +309,8 @@ abstract class Model
             list($insert_id, $affected_rows) = DB::insert($this->_table)->columns(array_keys($data))
                 ->values(array_values($data))->execute($this->db);
             $insert_id += 0;
+            if ($insert_id === 0 && $affected_rows > 0 && isset($data[$this->_primary]))
+                $insert_id = $data[$this->_primary] + 0;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
             $this->error_message = $e->getMessage();
@@ -271,8 +320,10 @@ abstract class Model
 
     /**
      * 更新一条记录
+     *
      * @param array $data
-     * @param int $primary_id
+     * @param int   $primary_id
+     *
      * @return bool
      */
     public function update(array $data, int $primary_id): bool
@@ -293,28 +344,31 @@ abstract class Model
      * Run the save method on the model
      *
      * @param array $option
+     *
      * @return boolean
      */
-    public function save(array $option):bool
+    public function save(array $option): bool
     {
-        if($this->_exists) {
+        if ($this->_exists) {
             return $this->insert($option) > 0 ? TRUE : FALSE;
         } else {
             return $this->update($option, $this[$this->_primary]);
         }
     }
-    
+
     /**
      * 删除记录
+     *
      * @param array|int $primary_id
+     *
      * @return bool
      */
     public function delete($primary_id): bool
     {
         $op = is_array($primary_id) ? 'IN' : '=';
         try {
-        	if($this->softDelete) {
-                DB::update($this->_table)->set([$this->softDeleteField=>time()])->where($this->_primary,$op,$primary_id)->execute($this->db);
+            if ($this->softDelete) {
+                DB::update($this->_table)->set([$this->softDeleteField => time()])->where($this->_primary, $op, $primary_id)->execute($this->db);
             } else {
                 DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
             }
@@ -331,6 +385,7 @@ abstract class Model
      *
      * @param array $where
      * @param mixed $value
+     *
      * @return boolean
      */
     public function exists(array $where = NULL): bool
@@ -343,6 +398,7 @@ abstract class Model
 
     /**
      * 是否存在符合条件的ID？
+     *
      * @param int $primary_id 主键ID
      *
      * @return bool
@@ -356,8 +412,9 @@ abstract class Model
     /**
      * 根据ID拷贝一份
      *
-     * @param int $id 主键ID
+     * @param int   $id   主键ID
      * @param array $data 覆盖字段值
+     *
      * @return int
      */
     public function copy_by_id(int $id, array $data = NULL): int
@@ -373,8 +430,8 @@ abstract class Model
      * 更新一个字段值
      *
      * @param string $field
-     * @param mixed $value
-     * @param int $primary_id
+     * @param mixed  $value
+     * @param int    $primary_id
      */
     public function set_field(string $field, string $value, int $primary_id): bool
     {
@@ -385,8 +442,9 @@ abstract class Model
      * 递增一个int字段值
      *
      * @param string $field
-     * @param int $primary_id
-     * @param int $step
+     * @param int    $primary_id
+     * @param int    $step
+     *
      * @return boolean
      */
     public function set_inc(string $field, int $primary_id, int $step = 1): bool
@@ -400,8 +458,9 @@ abstract class Model
      * 递减一个int字段值
      *
      * @param string $field
-     * @param int $primary_id
-     * @param int $step
+     * @param int    $primary_id
+     * @param int    $step
+     *
      * @return boolean
      */
     public function set_dec(string $field, int $primary_id, int $step = 1): bool
@@ -410,6 +469,7 @@ abstract class Model
             ->where($this->_primary, '=', $primary_id)->limit(1);
         return $query->execute($this->db) ? TRUE : FALSE;
     }
+
     /**
      * 获取主健定义
      *
@@ -419,16 +479,28 @@ abstract class Model
     {
         return isset($this->_primary) ? $this->_primary : $this->db->get_primary($this->_table);
     }
+
+    /**
+     * 获取表名
+     *
+     * @return string
+     */
+    public function getTable(string $alias = '')
+    {
+        return $alias ? $this->db->quote_table(array($this->db->db_name() . '.' . $this->_table, $alias)) : $this->db->quote_table($this->_table);
+    }
     /**
      * 数据输出前处理
+     *
      * @param array $r
      */
     abstract protected function output(array &$r);
 
     /**
      * select查询之后的处理
+     *
      * @param array $data
-     * @param bool $multiple
+     * @param bool  $multiple
      */
     protected function _after_select(array &$data, $multiple = FALSE)
     {
@@ -449,7 +521,7 @@ abstract class Model
      * $this->where($query, ['id' => 100, ['title','like', '测试'], ['time', '>=', time()]]);
      *
      * @param Database_Query_Builder_Where $where
-     * @param array $option
+     * @param array                        $option
      */
     public function where(Database_Query_Builder_Where &$query, array $option)
     {
@@ -477,6 +549,7 @@ abstract class Model
      *  $where .= $this->where_and(['id' => 100, ['title','like', '测试'], ['time', '>=', time()]]);
      *
      * @param array $option
+     *
      * @return string
      */
     public function where_and(array $option): string
@@ -504,6 +577,7 @@ abstract class Model
      *
      * @param string $field
      * @param string $mintime 时间戳
+     *
      * @return string
      */
     public function where_mintime(string $field, string $mintime): string
@@ -523,6 +597,7 @@ abstract class Model
      *
      * @param string $field
      * @param string $maxtime 时间戳
+     *
      * @return string
      */
     public function where_maxtime(string $field, string $maxtime): string
@@ -542,6 +617,7 @@ abstract class Model
      *
      * @param string $field
      * @param string $keywords
+     *
      * @return string
      */
     public function where_keywords(string $field, string $keywords): string
@@ -581,7 +657,9 @@ abstract class Model
 
     /**
      * 过滤只读字段
+     *
      * @param $data
+     *
      * @return void
      */
     private function _readonly(&$data)
@@ -594,7 +672,9 @@ abstract class Model
 
     /**
      * 插入时自动填充
+     *
      * @param $data
+     *
      * @return void
      */
     private function _create_autofill(&$data)
@@ -607,6 +687,7 @@ abstract class Model
 
     /**
      * 更新时自动填充
+     *
      * @param $data
      */
     private function _update_autofill(&$data)
