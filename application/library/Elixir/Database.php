@@ -564,7 +564,9 @@ abstract class Elixir_Database
     /**
      * Quote a database table name and adds the table prefix if needed.
      *
-     *     $table = $db->quote_table($table);
+     *     $table = $db->quote_table('table', 'alias');
+     *     $table = $db->quote_table(array('table', 'alias'));
+     *     $table = $db->quote_table('table');
      *
      * Objects passed to this function will be converted to strings.
      * [Database_Expression] objects will be compiled.
@@ -572,6 +574,7 @@ abstract class Elixir_Database
      * All other objects will be converted using the `__toString` method.
      *
      * @param   mixed $table table name or array(table, alias)
+     * @param   string|null $alias table name alias
      * @return  string
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
@@ -581,7 +584,12 @@ abstract class Elixir_Database
         // Identifiers are escaped by repeating them
         $escaped_identifier = $this->_identifier . $this->_identifier;
 
-        if (is_array($table)) {
+        //支持两个string参数'table', 'alias'
+        if (func_num_args() === 2){
+            list($table, $alias) = func_get_args();
+            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+        }
+        elseif (is_array($table)) {
             list($table, $alias) = $table;
             $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
         }

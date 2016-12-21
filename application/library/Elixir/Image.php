@@ -7,9 +7,9 @@
  * ->save(DOCROOT . '/thumb.jpg', 65);
  * @package    Elixir/Image
  * @category   Base
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license.html
+ * @license
  */
 abstract class Elixir_Image {
 
@@ -93,6 +93,7 @@ abstract class Elixir_Image {
 	 */
 	public function __construct($file)
 	{
+        $info = NULL;
 		try
 		{
 			// Get the real path to the file

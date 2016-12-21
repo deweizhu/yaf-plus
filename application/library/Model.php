@@ -381,6 +381,31 @@ abstract class Model
     }
 
     /**
+     * 按条件删除
+     *
+     * @param array $where
+     *
+     * @return bool
+     */
+    public function delete_by(array $where): bool
+    {
+        try {
+            if ($this->softDelete) {
+                $query = DB::update($this->_table)->set([$this->softDeleteField => $_SERVER['REQUEST_TIME']]);
+            } else {
+                $query = DB::delete($this->_table);
+            }
+            $this->where($query, $where);
+            $query->execute($this->db);
+            return TRUE;
+        } catch (Exception $e) {
+            $this->error_code = $e->getCode();
+            $this->error_message = $e->getMessage();
+        }
+        return FALSE;
+    }
+
+    /**
      * 是否存在符合条件的记录
      *
      * @param array $where
@@ -489,6 +514,7 @@ abstract class Model
     {
         return $alias ? $this->db->quote_table(array($this->db->db_name() . '.' . $this->_table, $alias)) : $this->db->quote_table($this->_table);
     }
+
     /**
      * 数据输出前处理
      *

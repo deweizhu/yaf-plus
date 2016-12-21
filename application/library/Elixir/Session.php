@@ -4,7 +4,7 @@
  *
  * @package    Elixir
  * @category   Session
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -94,7 +94,7 @@ abstract class Elixir_Session {
 	 * @return  void
 	 * @uses    Session::read
 	 */
-	public function __construct(array $config = NULL, $id = NULL)
+	public function __construct($config = NULL, $id = NULL)
 	{
 		if (isset($config['name']))
 		{
