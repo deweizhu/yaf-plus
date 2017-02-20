@@ -715,7 +715,21 @@ class Arr {
 	
 	    return $results;
 	}
-	
+    /**
+     * 过滤不需要的字段
+     *
+     * @param array $data 输入数据
+     * @param array $keys 需要的字段定义
+     * @return array
+     */
+    public static function filter_array(array $data, array $keys): array
+    {
+        foreach ($data as $field=>$v)
+        {
+            if (!in_array($field, $keys)) unset($data[$field]);
+        }
+        return $data;
+    }
 	/**
 	 * 方法从一个数组中移除指定的键/值对：
 	 *

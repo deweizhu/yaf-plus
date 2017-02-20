@@ -3,9 +3,9 @@
 /**
  * Date helper.
  *
- * @package    Elixir
- * @category   Helpers
- * @author     Elixir Team
+ * @package        Elixir
+ * @category       Helpers
+ * @author         知名不具
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -26,12 +26,14 @@ class Date
 
     /**
      * Default timestamp format for formatted_time
+     *
      * @var  string
      */
     public static $timestamp_format = 'Y-m-d H:i:s';
 
     /**
      * Timezone for formatted_time
+     *
      * @link http://uk2.php.net/manual/en/timezones.php
      * @var  string
      */
@@ -47,8 +49,9 @@ class Date
      * <http://php.net/timezones>.
      *
      * @param   string $remote timezone that to find the offset of
-     * @param   string $local timezone used as the baseline
-     * @param   mixed $now UNIX timestamp or date string
+     * @param   string $local  timezone used as the baseline
+     * @param   mixed  $now    UNIX timestamp or date string
+     *
      * @return  integer
      */
     public static function offset($remote, $local = NULL, $now = NULL)
@@ -83,9 +86,10 @@ class Date
      *
      *     $seconds = Date::seconds(); // 01, 02, 03, ..., 58, 59, 60
      *
-     * @param   integer $step amount to increment each step by, 1 to 30
+     * @param   integer $step  amount to increment each step by, 1 to 30
      * @param   integer $start start value
-     * @param   integer $end end value
+     * @param   integer $end   end value
+     *
      * @return  array   A mirrored (foo => foo) array from 1-60.
      */
     public static function seconds($step = 1, $start = 0, $end = 60)
@@ -109,7 +113,9 @@ class Date
      *     $minutes = Date::minutes(); // 05, 10, 15, ..., 50, 55, 60
      *
      * @uses    Date::seconds
+     *
      * @param   integer $step amount to increment each step by, 1 to 30
+     *
      * @return  array   A mirrored (foo => foo) array from 1-60.
      */
     public static function minutes($step = 5)
@@ -127,9 +133,10 @@ class Date
      *
      *     $hours = Date::hours(); // 01, 02, 03, ..., 10, 11, 12
      *
-     * @param   integer $step amount to increment each step by
-     * @param   boolean $long use 24-hour time
+     * @param   integer $step  amount to increment each step by
+     * @param   boolean $long  use 24-hour time
      * @param   integer $start the hour to start at
+     *
      * @return  array   A mirrored (foo => foo) array from start-12 or start-23.
      */
     public static function hours($step = 1, $long = FALSE, $start = NULL)
@@ -163,6 +170,7 @@ class Date
      *     $type = Date::ampm(1);  // AM
      *
      * @param   integer $hour number of the hour
+     *
      * @return  string
      */
     public static function ampm($hour)
@@ -179,7 +187,8 @@ class Date
      *     $hour = Date::adjust(3, 'pm'); // 15
      *
      * @param   integer $hour hour to adjust
-     * @param   string $ampm AM or PM
+     * @param   string  $ampm AM or PM
+     *
      * @return  string
      */
     public static function adjust($hour, $ampm)
@@ -210,7 +219,8 @@ class Date
      *     Date::days(4, 2010); // 1, 2, 3, ..., 28, 29, 30
      *
      * @param   integer $month number of month
-     * @param   integer $year number of year to check month, defaults to the current year
+     * @param   integer $year  number of year to check month, defaults to the current year
+     *
      * @return  array   A mirrored (foo => foo) array of the days.
      */
     public static function days($month, $year = FALSE)
@@ -261,7 +271,9 @@ class Date
      *     // array(1 => 'Jan', 2 => 'Feb', ..., 12 => 'Dec')
      *
      * @uses    Date::hours
+     *
      * @param   string $format The format to use for months
+     *
      * @return  array   An array of months based on the specified format
      */
     public static function months($format = NULL)
@@ -287,7 +299,8 @@ class Date
      *     $years = Date::years(2000, 2010); // 2000, 2001, ..., 2009, 2010
      *
      * @param   integer $start starting year (default is current year - 5)
-     * @param   integer $end ending year (default is current year + 5)
+     * @param   integer $end   ending year (default is current year + 5)
+     *
      * @return  array
      */
     public static function years($start = FALSE, $end = FALSE)
@@ -314,8 +327,9 @@ class Date
      *     $span = Date::span(60, 182, 'minutes'); // 2
      *
      * @param   integer $remote timestamp to find the span of
-     * @param   integer $local timestamp to use as the baseline
-     * @param   string $output formatting string
+     * @param   integer $local  timestamp to use as the baseline
+     * @param   string  $output formatting string
+     *
      * @return  string   when only a single output is requested
      * @return  array    associative list of all outputs requested
      */
@@ -389,10 +403,10 @@ class Date
      *  $span = Date::fuzzy_span(time() - 10); // "10秒以前"
      * 设置 $locale 为 false， 除非你在 skyuc_date() 调用中动态设置  date() 和 strftime() 的格式
      *
-     * @param    string $format 同PHP date函数格式
-     * @param    integer    Unix 时间戳
-     * @param    boolean    如果为 true, 使用 strftime() 生成指定日期
-     * @param    boolean    如果为 true, 使用 gmstrftime() 、 gmdate() 替换 strftime() 和 date()
+     * @param    string $format    同PHP date函数格式
+     * @param           integer    Unix 时间戳
+     * @param           boolean    如果为 true, 使用 strftime() 生成指定日期
+     * @param           boolean    如果为 true, 使用 gmstrftime() 、 gmdate() 替换 strftime() 和 date()
      *
      * @return    string    格式化的日期字符串
      */
@@ -439,6 +453,7 @@ class Date
      *     $dos = Date::unix2dos($unix);
      *
      * @param   integer $timestamp UNIX timestamp
+     *
      * @return  integer
      */
     public static function unix2dos($timestamp = FALSE)
@@ -466,6 +481,7 @@ class Date
      *     $unix = Date::dos2unix($dos);
      *
      * @param   integer $timestamp DOS timestamp
+     *
      * @return  integer
      */
     public static function dos2unix($timestamp = FALSE)
@@ -486,9 +502,11 @@ class Date
      *     $time = Date::formatted_time('5 minutes ago');
      *
      * @link    http://www.php.net/manual/datetime.construct
-     * @param   string $datetime_str datetime string
+     *
+     * @param   string $datetime_str     datetime string
      * @param   string $timestamp_format timestamp format
-     * @param   string $timezone timezone identifier
+     * @param   string $timezone         timezone identifier
+     *
      * @return  string
      */
     public static function formatted_time($datetime_str = 'now', $timestamp_format = NULL, $timezone = NULL)
@@ -510,9 +528,10 @@ class Date
     /**
      * 友好格式化日期：已过去多久
      *
-     * @param int $time 输入时间戳
+     * @param int    $time   输入时间戳
      * @param string $format 时间格式
      * @param boolon $second 是否精确到秒
+     *
      * @return string
      */
     public static function time_format(int $time, string $format = 'Y年n月j日 G:i:s', bool $second = FALSE): string
@@ -547,9 +566,10 @@ class Date
     /**
      * 友好格式化日期：多久之后
      *
-     * @param int $time 时间戳
+     * @param int    $time        时间戳
      * @param string $full_format 超出指定天数范围后使用的时间戳
-     * @param int $day_max 指定一个天数范围，当剩余天数大于该天数时，返回 $full_format 格式的时间
+     * @param int    $day_max     指定一个天数范围，当剩余天数大于该天数时，返回 $full_format 格式的时间
+     *
      * @return string 格式化结果
      */
     public static function time_format_after(int $time, string $full_format = 'Y-m-d H:i:s', int $day_max = 30): string
@@ -589,6 +609,7 @@ class Date
      * 友好格式化时时：将转换为时分秒显示
      *
      * @param int $second 秒数
+     *
      * @return string
      */
     public static function second_format(int $second): string
@@ -617,9 +638,10 @@ class Date
 
     /**
      * 本周一凌晨00:00:00
+     *
      * @return int
      */
-    public static function week_unix():int
+    public static function week_unix(): int
     {
         static $result = NULL;
         if (is_null($result)) {
@@ -631,9 +653,10 @@ class Date
 
     /**
      * 本周一凌晨时间戳
+     *
      * @return string
      */
-    public static function week():string
+    public static function week(): string
     {
         static $result = NULL;
         if (is_null($result)) {
@@ -642,4 +665,41 @@ class Date
         }
         return $result;
     }
+
+    /**
+     * 指定日期凌晨00:00:00的时间戳
+     *
+     * @param string $mintime 日期
+     *
+     * @return int
+     */
+    public static function mintime(string $mintime): int
+    {
+        if (!$mintime) return 0;
+        $mintime = trim($mintime);
+        if (!is_numeric($mintime)) {
+            if (strlen($mintime) == 10) $mintime .= ' 00:00:00';
+            return strtotime($mintime);
+        }
+        return 0;
+    }
+
+    /**
+     * 指定日期23:59:59的时间戳
+     *
+     * @param string $maxtime 时间戳
+     *
+     * @return int
+     */
+    public static function maxtime(string $maxtime): int
+    {
+        if (!$maxtime) return 0;
+        $maxtime = trim($maxtime);
+        if (!is_numeric($maxtime)) {
+            if (strlen($maxtime) == 10) $maxtime .= ' 23:59:59';
+            return strtotime($maxtime);
+        }
+        return 0;
+    }
+
 }

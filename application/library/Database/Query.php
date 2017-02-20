@@ -208,7 +208,10 @@ class Database_Query
     {
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            if (is_null($db))
+                $db = Database::instance();
+            else
+                $db = Database::instance($db);
         }
 
         if ($as_object === NULL) {
@@ -234,8 +237,8 @@ class Database_Query
         }
         
         // 增加sql 日志输出
-//         $log = Log::instance();
-//         $log->add(Log::NOTICE, ':sql',[':sql'=>$sql]);
+        $log = Log::instance();
+        $log->add(Log::NOTICE, ':sql',[':sql'=>$sql]);
         
         // Execute the query
         $result = $db->query($this->_type, $sql, $as_object, $object_params);

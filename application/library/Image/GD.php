@@ -4,9 +4,9 @@
  *
  * @package    Elixir/Image
  * @category   Drivers
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2016-2017 Elixir Team
- * @license    http://Elixirphp.com/license.html
+ * @license    .html
  */
 class Image_GD extends Image {
 

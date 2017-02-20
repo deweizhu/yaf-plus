@@ -11,7 +11,7 @@
  *   Zlog::$logfile = DOCROOT . '/debug.txt';
  *   Zlog::write($data);
  *
- * @author: ZDW
+ * @author    知名不具
  * @date: 2015-05-05
  * @version: $Id: Zlog.php 624 2015-12-08 08:39:52Z zhudewei $
  */

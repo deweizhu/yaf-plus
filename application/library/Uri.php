@@ -2,7 +2,7 @@
 
 /**
  * URI
- * @author: ZDW
+ * @author    知名不具
  * @date: 2015-12-17
  * @version: $Id: Uri.php 1232 2015-12-17 08:51:31Z zhudewei $
  */

@@ -10,7 +10,7 @@
  * @link https://github.com/nicolasff/phpredis
  * @link https://github.com/puneetk/Elixir-redis-cache
  *
- * @author Chris Go <chris@velocimedia.com>
+ * @author    知名不具
  */
 class Cache_Redis extends Cache implements Cache_Tagging
 {
@@ -281,4 +281,6 @@ class Cache_Redis extends Cache implements Cache_Tagging
         }
         return null;
     }
+    
+    
 }

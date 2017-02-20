@@ -130,18 +130,14 @@ class Database_PDO extends Database {
 		$this->_connection->exec('SET NAMES '.$this->quote($charset));
 	}
 
-	public function query(int $type, string $sql, bool $as_object = FALSE, array $params = NULL)
+	public function query(int $type, string $sql, $as_object = FALSE, array $params = [],array $ctorargs = [])
 	{
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
 
 		try
 		{
-		    if($as_object == false && isset($params)) {
-			  $sth = $this->_connection->prepare($sql);
-		    } else {
-		       $sth = $this->_connection->query($sql);
-		    }
+		    $sth = $this->_connection->prepare($sql);
 		}
 		catch (Exception $e)
 		{
@@ -157,9 +153,7 @@ class Database_PDO extends Database {
 		// Set the last query
 		$this->last_query = $sql;
 		
-		if($as_object == false && isset($params)) {
-		    $sth->execute($params);
-		}
+	    $sth->execute($params);
 
 		if ($type === Database::SELECT)
 		{
@@ -170,7 +164,7 @@ class Database_PDO extends Database {
 			}
 			elseif (is_string($as_object))
 			{
-				$sth->setFetchMode(PDO::FETCH_CLASS, $as_object, $params);
+				$sth->setFetchMode(PDO::FETCH_CLASS, $as_object, $ctorargs);
 			}
 			else
 			{

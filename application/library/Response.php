@@ -15,6 +15,7 @@ class Response
     public static function jsonResult($content, string $message = '', array $append = array())
     {
         self::jsonResponse($content, 0, $message, $append);
+        return FALSE;
     }
 
     /**
@@ -25,6 +26,7 @@ class Response
     public static function jsonError(string $msg, array $append = array())
     {
         self::jsonResponse('', 1, $msg, $append);
+        return FALSE;
     }
 
     /**
@@ -63,9 +65,10 @@ class Response
      * @param string $msg  提示消息
      * @param array  $append
      */
-    public static function apiJsonResult(array $data, string $msg = '', array $append = array())
+    public static function apiJsonResult($data, string $msg = '', array $append = array()): bool
     {
         self::apiJsonResponse($data, 0, $msg, $append);
+        return TRUE;
     }
 
     /**
@@ -74,26 +77,25 @@ class Response
      * @param int    $error 错误代码
      * @param string $msg   提示消息
      */
-    public static function apiJsonError(int $error, string $msg)
+    public static function apiJsonError(int $error, string $msg): bool
     {
         self::apiJsonResponse([], $error, $msg);
+        return FALSE;
     }
 
     /**
      * 创建一个JSON格式的数据
      *
-     * @access  public
-     *
      * @param   array  $data
-     * @param   int    $error
+     * @param   int    $code
      * @param   string $msg
      *
      * @return  void
      */
-    private static function apiJsonResponse(array $data = [], int $error = 200, string $msg = '', array $append = array())
+    private static function apiJsonResponse($data, int $code = 0, string $msg = '', array $append = array())
     {
 
-        $res = array('error' => $error, 'msg' => $msg);
+        $res = array('code' => $code, 'msg' => $msg);
         if (!empty($data))
             $res['data'] = $data;
         if (!empty($append)) {
@@ -128,5 +130,23 @@ class Response
         $pbres->setMsg($msg);
         echo $pbres->serializeToString();
         exit();
+    }
+    
+    /**
+     * 跳出
+     * 
+     * @param int $code
+     * @param string $message
+     * @param array $headers
+     * @throws Exception_NotFoundHttpException
+     * @throws Exception_HttpException
+     */
+    public static function abort(int $code, $message = '', array $headers = [])
+    {
+        if ($code == 404) {
+            throw new Exception_NotFoundHttpException($message);
+        }
+    
+        throw new Exception_HttpException($code, $message, null, $headers);
     }
 }

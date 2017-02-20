@@ -49,7 +49,7 @@ class Http_Request
     public static function instance()
     {
         if (!isset(self::$instances)) {
-            self::$instances = new HttpRequest();
+            self::$instances = new Http_Request();
         }
         return self::$instances;
     }

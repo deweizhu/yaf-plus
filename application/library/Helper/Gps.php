@@ -2,7 +2,7 @@
 /**
  *  GPS定位类
  *
- * @author: ZDW
+ * @author    知名不具
  */
 class Helper_Gps
 {

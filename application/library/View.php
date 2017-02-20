@@ -47,8 +47,11 @@ class View
             list($context, $uri) = $args;
         if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE) return $uri;
         $file = PUBPATH . $uri;
-        if (!is_file($file)) {
+        if (!is_file($file) && !is_file($file.'.js')) {
             return '';
+        }
+        if(is_file($file.'.js')) {
+            return $uri;
         }
         return $uri . '?_' . filemtime($file);
     }
@@ -69,7 +72,15 @@ class View
             list($model, $id, $filed) = $args;
         else
             list($context, $model, $id, $filed) = $args;
-        $class = ucfirst($model) . 'Model';
+        if (strpos($model, '_') !== FALSE) {
+            $arr = explode('_', $model);
+            foreach ($arr as &$v)
+                $v = ucfirst($v);
+            unset($v);
+            $class = implode('_', $arr) . 'Model';
+        } else {
+            $class = ucfirst($model) . 'Model';
+        }
         $id += 0;
         return $class::instance()->get($id, $filed, TRUE);
     }

@@ -5,7 +5,7 @@
  *
  * @package    Elixir
  * @category   Helpers
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2009-2012 Elixir Team
  * @license
  */

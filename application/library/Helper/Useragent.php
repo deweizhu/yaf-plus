@@ -8,7 +8,7 @@
  * @package		CodeIgniter
  * @subpackage	Libraries
  * @category	User Agent
- * @author		EllisLab Dev Team
+ * @author    知名不具
  * @link		http://codeigniter.com/user_guide/libraries/user_agent.html
  */
 class Helper_Useragent {

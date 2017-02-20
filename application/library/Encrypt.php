@@ -19,7 +19,7 @@
  *
  * @package    Elixir
  * @category   Security
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */

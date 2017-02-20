@@ -210,7 +210,7 @@ abstract class Elixir_Database
      * @return  array    list (insert id, row count) for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
-    abstract public function query(int $type, string $sql, bool $as_object = FALSE, array $params = NULL);
+    abstract public function query(int $type, string $sql, $as_object = FALSE, array $params = [], array $ctorargs = []);
 
     /**
      * Start a SQL transaction

@@ -4,7 +4,7 @@
  *
  * @package    Elixir
  * @category   Logging
- * @author     Jeremy Bush
+ * @author    知名不具
  * @copyright  (c) 2012 Elixir Team
  * @license
  */

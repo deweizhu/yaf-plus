@@ -1,8 +1,8 @@
 <?php
 /**
- *  PHP Template
+ *  PHP Twig Template
  *
- * @author: ZDW
+ * @author    知名不具
  * @date: 2016-11-03
  * @version: $Id$
  */

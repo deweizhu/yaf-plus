@@ -37,9 +37,9 @@
  *
  * @package    Elixir/Cache
  * @category   Base
- * @author     Elixir Team
+ * @author    知名不具
  * @copyright  (c) 2009-2012 Elixir Team
- * @license    http://Elixirphp.com/license
+ * @license
  */
 class Cache_Wincache extends Elixir_Cache {
 

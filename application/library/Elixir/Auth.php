@@ -33,7 +33,7 @@ abstract class Elixir_Auth {
 
 	abstract protected function _login(array $credentials, bool $remember);
 
-	abstract public function password(array $credentials);
+	abstract public function password($credentials);
 
 	abstract public function check_password(string $password);
 

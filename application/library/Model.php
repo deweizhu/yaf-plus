@@ -9,7 +9,7 @@
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
-abstract class Model
+abstract class Model implements ArrayAccess, JsonSerializable
 {
 
     /**
@@ -30,6 +30,27 @@ abstract class Model
      * @var array
      */
     protected $_fields = array();
+    
+    /**
+     * 可批量赋值参数，当$_fields 为空是，取该值
+     *
+     * @var array
+     */
+    protected $guarded = ['*'];
+    
+    /**
+     * 是否需要验证 $_fields,默认需要
+     *
+     * @var bool
+     */
+    protected static $unguarded = false;
+    
+    /**
+     * 查询结果集中隐藏的字段
+     * 
+     * @var array
+     */
+    protected $_hidden = array();
 
     /**
      * 只读字段
@@ -57,21 +78,16 @@ abstract class Model
      *
      * @var string $softDelete
      */
-    protected $softDelete = FALSE;
+    protected $_softDelete = FALSE;
 
     /**
      * 软删除字段
      *
      * @var string
      */
-    protected $softDeleteField = 'deleted_at';
-
-    /**
-     * 模型是否存在
-     *
-     * @var bool
-     */
-    protected $_exists = FALSE;
+    protected $_softDeleteField = 'deleted_at';
+    
+    protected $_tablePrefix = NULL;
 
     /**
      * 插入时，准备好的数据
@@ -84,16 +100,67 @@ abstract class Model
     protected $error_code = 0;
     protected $error_message = '';
 
+    protected static $_count_items = 0;
+    
+    /**
+     * 事件
+     * @var string
+     */
+    public $_event;
+    
+    /**
+     * The attributes that should be visible in arrays.
+     *
+     * @var array
+     */
+    protected $visible = [];
+    
+    /**
+     * 模型的属性值
+     *
+     * @var array
+     */
+    protected $attributes = [];
+    
+    /**
+     * The model attribute's original state.
+     *
+     * @var array
+     */
+    protected $original = [];
+
     /**
      * 分页
      *
      * @var null
      */
     protected $pagination = NULL;
-
-    public function __construct()
+    
+    /**
+     * @var self
+     */
+    protected static $_instance = NULL;
+    
+    public function __construct(array $attributes = [])
     {
-        $this->db = Database::instance();
+        $this->setTablePrefix($this->_tablePrefix);
+        
+        $this->syncOriginal();
+
+        $this->fill($attributes);
+    }
+
+    /**
+     * 单实例
+     *
+     * @return self
+     */
+    public static function instance()
+    {
+        if(static::$_instance === NULL || !(static::$_instance instanceof static)) {
+            static::$_instance = new static;
+        }
+        return static::$_instance;
     }
 
     /**
@@ -131,6 +198,9 @@ abstract class Model
     {
         $query = DB::select_array($fields)->from($this->_table);
         $this->where($query, $where);
+        if($this->_softDelete) {
+            $query->where($this->_softDeleteField, '=', 0);
+        }
         $limit > 0 and $query->limit($limit)->offset($offset);
         $cache AND $query->cached();
         //排序
@@ -147,7 +217,7 @@ abstract class Model
                 }
             }
         }
-        $data = $query->execute($this->db)->result();
+        $data = $query->execute(Database::instance())->result();
         if (!$data) {
             $this->error_message = 'nothing.';
             return [];
@@ -171,13 +241,12 @@ abstract class Model
     public function paging(array $where = NULL, array $fields = NULL, string $order = '', int $page = 1, int $size = 16,
                            bool $cache = FALSE): array
     {
-        static $count_items = 0;
-        if ($count_items === 0) {
-            $count_items = $this->count_records($where, TRUE);
+        if (self::$_count_items === 0) {
+            self::$_count_items = $this->count_records($where, $cache);
         }
-        $this->pagination = Pagination::factory($page, $count_items, $size);
+        $this->pagination = Pagination::factory($page, self::$_count_items, $size);
         if ($this->pagination->count_items <= 0)
-            return [];
+            return ['data' => array(), 'pager' => $this->pagination];
         $data = $this->select($where, $fields, $order, $this->pagination->items_per_page, $this->pagination->items_offset, $cache);
 
         return ['data' => $data, 'pager' => $this->pagination];
@@ -192,12 +261,12 @@ abstract class Model
      *
      * @return array
      */
-    public function fetchAll(array $where = NULL, array $fields = NULL, bool $cache = TRUE): array
+    public function fetchAll(array $where = [], array $fields = [], bool $cache = TRUE): array
     {
         $query = DB::select_array($fields)->from($this->_table);
         $this->where($query, $where);
         $cache AND $query->cached();
-        $result = $query->execute($this->db)->result();
+        $result = $query->execute(Database::instance())->result();
         if (!$result) {
             $this->error_message = 'nothing.';
             return [];
@@ -218,7 +287,7 @@ abstract class Model
         $query = DB::select(DB::expr('COUNT(*) AS total'))->from($this->_table);
         $this->where($query, $where);
         $cache AND $query->cached();
-        $record_count = $query->limit(1)->execute($this->db)->get('total');
+        $record_count = $query->limit(1)->execute(Database::instance())->get('total');
         return $record_count ? intval($record_count) : 0;
     }
 
@@ -233,9 +302,9 @@ abstract class Model
      */
     public function get($id, string $field, bool $cache = FALSE): string
     {
-        $query = DB::select(array($field, 'alias'))->from($this->_table)->where($this->_primary, '=', $id)->limit(1);
+        $query = DB::select(array($field, 'alias_fiedld'))->from($this->_table)->where($this->_primary, '=', $id)->limit(1);
         $cache AND $query->cached();
-        $data = $query->execute($this->db)->get('alias', '');
+        $data = $query->execute(Database::instance())->get('alias_fiedld', '');
         return $data ?: '';
     }
 
@@ -248,13 +317,14 @@ abstract class Model
      *
      * @return string
      */
-    public function get_by($where, string $field, bool $cache = FALSE): string
+    public function get_by(array $where, string $field, bool $cache = FALSE): string
     {
-        $query = DB::select_array(array($field, 'alias'))->from($this->_table);
+        $query = DB::select(array($field, 'alias_fiedld'))->from($this->_table);
         $this->where($query, $where);
         $query->limit(1);
         $cache AND $query->cached();
-        $data = $query->execute($this->db)->get('alias', '');
+        $query->execute();
+        $data = $query->execute($this->db)->get('alias_fiedld', '');
         return $data ?: '';
     }
 
@@ -293,6 +363,59 @@ abstract class Model
         $data = $query->execute($this->db)->current();
         return $data ?: array();
     }
+    
+    /**
+     * 获取model
+     * 
+     * @param int $id
+     * @return mixed
+     */
+    public function find_model(int $id)
+    {
+        $fields = $this->_filter_hidden_fields();
+        
+        $sql = 'select '.$fields.' from '.$this->_table.' where id=?';
+        return  Database::instance()->query(Database::SELECT, $sql,get_class($this),[$id])->current();
+    }
+    
+    /**
+     * 查询，返回Model类型
+     * 
+     * @param array $options 
+     * @param string $order
+     * @param int $limit
+     * @param int $offset
+     */
+    public function select_model(array $options = [], string $order = NULL,int $limit = 0,int $offset = 0)
+    {
+        $fields = $this->_filter_hidden_fields();
+        
+        $sql = 'select '.$fields.' from '.$this->_table;
+        
+        $params = array();
+        
+        if(!empty($options)) {
+            $where = '';
+            foreach ($options as $key=>$val) {
+                if($val === NULL) {
+                    $where .= ' '.$key.' IS NULL AND';
+                } else {
+                    $where .= ' '.$key.'=:'.$key.' AND';
+                }
+                
+                $params[':'.$key] = $val;
+            }
+            $sql .= ' WHERE '.substr($where,0,strlen($where)-3);
+        }
+        
+        if(!empty($order)) 
+            $sql .= ' ORDER BY '.$order;
+        
+        if ($limit > 0)
+            $sql .= ' LIMIT '.$limit.' OFFSET '.$offset;
+        
+        return  Database::instance()->query(Database::SELECT, $sql,get_class($this),$params)->result();
+    }
 
     /**
      * 插入一条记录
@@ -304,10 +427,18 @@ abstract class Model
     public function insert(array $data): int
     {
         $insert_id = 0;
+        if(!empty($this->_fields)) {
+            if(! empty($this->_hidden)) {
+                $fields = array_unique(array_merge($this->_fields,$this->_hidden));
+            } else {
+                $fields = $this->_fields;
+            }
+            $data = Arr::filter_array($data, $fields);
+        }
         $this->_create_autofill($data);
         try {
             list($insert_id, $affected_rows) = DB::insert($this->_table)->columns(array_keys($data))
-                ->values(array_values($data))->execute($this->db);
+                ->values(array_values($data))->execute(Database::instance());
             $insert_id += 0;
             if ($insert_id === 0 && $affected_rows > 0 && isset($data[$this->_primary]))
                 $insert_id = $data[$this->_primary] + 0;
@@ -331,29 +462,13 @@ abstract class Model
         $this->_readonly($data);
         $this->_update_autofill($data);
         try {
-            DB::update($this->_table)->set($data)->where($this->_primary, '=', $primary_id)->execute($this->db);
+            DB::update($this->_table)->set($data)->where($this->_primary, '=', $primary_id)->execute(Database::instance());
             return TRUE;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
             $this->error_message = $e->getMessage();
         }
         return FALSE;
-    }
-
-    /**
-     * Run the save method on the model
-     *
-     * @param array $option
-     *
-     * @return boolean
-     */
-    public function save(array $option): bool
-    {
-        if ($this->_exists) {
-            return $this->insert($option) > 0 ? TRUE : FALSE;
-        } else {
-            return $this->update($option, $this[$this->_primary]);
-        }
     }
 
     /**
@@ -367,15 +482,43 @@ abstract class Model
     {
         $op = is_array($primary_id) ? 'IN' : '=';
         try {
-            if ($this->softDelete) {
-                DB::update($this->_table)->set([$this->softDeleteField => time()])->where($this->_primary, $op, $primary_id)->execute($this->db);
+            if ($this->_softDelete) {
+                DB::update($this->_table)->set([$this->_softDeleteField => time()])->where($this->_primary, $op, $primary_id)->execute(Database::instance());
             } else {
-                DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
+                DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute(Database::instance());
             }
             return TRUE;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
             $this->error_message = $e->getMessage();
+        }
+        return FALSE;
+    }
+    
+    /**
+     * 恢复软删除数据
+     * 
+     * @param int|array $primary_id
+     * @return bool
+     */
+    public function restore($primary_id):bool
+    {
+        if($this->_softDelete) {
+            $op = is_array($primary_id) ? $primary_id:[$primary_id];
+        
+            $strIds = explode(',', $primary_id);
+            
+            $sql = 'UPDATE ' . Database::instance()->table_prefix() . $this->_table . ' set '.$this->_softDeleteField.'=? WHERE id in(?)' ;
+        
+            try {
+                Database::instance()->query(DATABASE::UPDATE, $sql,FALSE,[0,$strIds]);
+                return TRUE;
+            } catch (Exception $e) {
+                $this->error_code = $e->getCode();
+                $this->error_message = $e->getMessage();
+            }
+            
+            return FALSE;
         }
         return FALSE;
     }
@@ -417,7 +560,7 @@ abstract class Model
     {
         $query = DB::select(DB::expr('1'))->from($this->_table);
         $this->where($query, $where);
-        $ret = $query->limit(1)->execute($this->db)->get('1');
+        $ret = $query->limit(1)->execute(Database::instance())->get('1');
         return $ret ? TRUE : FALSE;
     }
 
@@ -430,7 +573,7 @@ abstract class Model
      */
     public function exists_id(int $primary_id): bool
     {
-        $ret = DB::select(DB::expr('1'))->from($this->_table)->where($this->_primary, '=', $primary_id)->limit(1)->execute($this->db)->get('1');
+        $ret = DB::select(DB::expr('1'))->from($this->_table)->where($this->_primary, '=', $primary_id)->limit(1)->execute(Database::instance())->get('1');
         return $ret ? TRUE : FALSE;
     }
 
@@ -502,7 +645,7 @@ abstract class Model
      */
     public function getPrimary()
     {
-        return isset($this->_primary) ? $this->_primary : $this->db->get_primary($this->_table);
+        return isset($this->_primary) ? $this->_primary : Database::instance()->get_primary($this->_table);
     }
 
     /**
@@ -512,7 +655,7 @@ abstract class Model
      */
     public function getTable(string $alias = '')
     {
-        return $alias ? $this->db->quote_table(array($this->db->db_name() . '.' . $this->_table, $alias)) : $this->db->quote_table($this->_table);
+        return $alias ? Database::instance()->quote_table(array(Database::instance()->db_name() . '.' . $this->_table, $alias)) : Database::instance()->quote_table($this->_table);
     }
 
     /**
@@ -534,7 +677,7 @@ abstract class Model
             return;
         }
         if ($multiple) {
-            array_walk($data, array($this, "output"));
+            array_walk($data, array($this, 'output'));
         } else {
             $this->output($data);
         }
@@ -557,7 +700,7 @@ abstract class Model
             if (is_array($v)) {
                 list($field, $op, $val) = $v;
                 if (strtolower($op) === 'like'):
-                    $query->where(DB::expr('INSTR(' . $this->db->quote_column($field) . ', ?1)', ['?1' => $val]), '>', 0);
+                    $query->where(DB::expr('INSTR(' . Database::instance()->quote_column($field) . ', ?1)', ['?1' => $val]), '>', 0);
                 else:
                     $query->where($field, $op, $val);
                 endif;
@@ -650,7 +793,7 @@ abstract class Model
     {
         $keywords = trim($keywords);
         if ($keywords === '') return '';
-        $where = ' AND INSTR(' . $this->db->quote_column($field) . ', ' . $this->db->quote($keywords) . ') > 0 ';
+        $where = ' INSTR(' . $this->db->quote_column($field) . ', ' . $this->db->quote($keywords) . ') > 0 ';
         return $where;
     }
 
@@ -690,6 +833,7 @@ abstract class Model
      */
     private function _readonly(&$data)
     {
+        if (isset($data[$this->_primary])) unset($data[$this->_primary]);
         if (empty($this->_readonly)) return;
         foreach ($this->_readonly as $field => $val) {
             if (isset($data[$field])) unset($data[$field]);
@@ -707,7 +851,7 @@ abstract class Model
     {
         if (empty($this->_create_autofill)) return;
         foreach ($this->_create_autofill as $field => $val) {
-            if (!isset($data[$field])) $data[$field] = $val;
+            if (!isset($data[$val])) $data[$field] = $val;
         }
     }
 
@@ -723,5 +867,749 @@ abstract class Model
             if (!isset($data[$field])) $data[$field] = $val;
         }
     }
+    
+    /**
+     * 隐藏不需要的展示的字段
+     * 
+     *  @param $data
+     */
+    private function _filter_hidden_fields()
+    {
+        if(!empty($this->_fields)) {
+            $this->_fields = array_merge($this->_fields,[$this->_primary]);
+            
+            if(!empty($this->_hidden)) {
+                Arr::filter_array($this->_fields, $this->_hidden);
+            }
+                        
+            $fields = $this->_fields;
+        } elseif($this->guarded){
+            $fields = $this->guarded;
+        }
+        
+        $fields = $this->columnize($fields);
+        
+        return $fields;
+    }
+    
+    /**
+     * 新增
+     * 
+     * @param array $values
+     * @return Model
+     */
+    protected function performInsert(array $values)
+    {
+        $table = $this->_table;
+        
+        $this->fireEvent('creating');
+        
+        if(!empty($this->_create_autofill)) {
+            $values = array_merge($values,$this->_create_autofill);
+        }
+        
+        if (! is_array(reset($values))) {
+            $values = [$values];
+        } else {
+            foreach ($values as $key => $value) {
+                ksort($value);
+                $values[$key] = $value;
+            }
+        }
+        
+        $bindings = [];
+        
+        foreach ($values as $record) {
+            foreach ($record as $value) {
+                $bindings[] = $value;
+            }
+        }
+        
+        $parameters = [];
+        
+        foreach ($values as $record) {
+            $parameters[] = '('.$this->parameterize($record).')';
+        }
+        
+        $parameters = implode(', ', $parameters);
+        
+        $columns = $this->columnize(array_keys(reset($values)));
+        
+        $insert_sql = "INSERT INTO $table ($columns) values $parameters";
+        
+        list($insert_id,$row) = Database::instance()->query(Database::INSERT, $insert_sql,get_class($this),array_values($bindings));
 
+        $this->setAttribute($this->_primary, $insert_id);
+        
+        $this->fireEvent('created');
+        
+        return $this;
+    }
+    
+    /**
+     * 更新
+     * 
+     * @param array $values
+     * @return Model
+     */
+    protected function performUpdate(array $values)
+    {
+        $this->fireEvent('updating');
+        
+        $dirty = $this->getDirty();
+        
+        if(count($dirty) > 0) {
+            if(!empty($this->_update_autofill)) {
+                $dirty = array_merge($dirty,$this->_update_autofill);
+            }
+            
+            $table = $this->_table;
+                        
+            $columns = [];
+            
+            foreach ($dirty as $key => $value) {
+                $columns[] = $this->wrap($key).' = '.$this->parameter($value);
+            }
+            
+            $columns = implode(', ', $columns);
+            
+            $update_sql = trim("update {$table} set $columns WHERE {$this->_primary}={$this->id}");
+            
+            Database::instance()->query(Database::UPDATE, $update_sql,get_class($this),array_values($dirty));
+            
+            $this->fireEvent('updated');
+            
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * 获取更新数据
+     * 
+     * @return []
+     */
+    public function getDirty()
+    {
+        $dirty = [];
+    
+        foreach ($this->attributes as $key => $value) {
+            if (! array_key_exists($key, $this->original)) {
+                $dirty[$key] = $value;
+            } elseif ($value !== $this->original[$key] && ! $this->originalIsNumericallyEquivalent($key)) {
+                    $dirty[$key] = $value;
+            }
+        }
+    
+        return $dirty;
+    }
+    
+    /**
+     * 保证更新字段，是需要更新的
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    protected function originalIsNumericallyEquivalent($key)
+    {
+        $current = $this->attributes[$key];
+    
+        $original = $this->original[$key];
+    
+        return is_numeric($current) && is_numeric($original) && strcmp((string) $current, (string) $original) === 0;
+    }
+    
+    /**
+     * Run the save method on the model
+     *
+     * @param array $option
+     *
+     * @return Object
+     */
+    public function save(array $options = [])
+    {
+        $this->fireEvent('saving');
+        
+        if(!empty($options))
+            $this->fill($options);       
+        
+        if (empty($this->id)) {
+            $saved = $this->performInsert($this->attributes);
+        } else {
+            $saved = $this->performUpdate($this->attributes);
+        }
+        
+        $this->fireEvent('saved');
+        
+        return $saved;
+    }
+    
+    /**
+     * 填充数据
+     * 
+     * @param array $attributes
+     * @throws Exception
+     * @return Model
+     */
+    public function fill(array $attributes)
+    {
+        $totallyGuarded = $this->totallyGuarded();
+    
+        foreach ($this->fillableFromArray($attributes) as $key => $value) {
+            $key = $this->removeTableFromKey($key);
+    
+            if ($this->isFillable($key)) {
+                $this->setAttribute($key, $value);
+            } elseif ($totallyGuarded) {
+                throw new Exception();
+            }
+        }
+    
+        return $this;
+    }
+    
+    /**
+     * Determine if the model is totally guarded.
+     *
+     * @return bool
+     */
+    public function totallyGuarded()
+    {
+        return count($this->_fields) == 0 && $this->guarded == ['*'];
+    }
+
+    protected function fillableFromArray(array $attributes)
+    {
+        if (count($this->_fields) > 0) {
+            return array_intersect_key($attributes, array_flip($this->_fields));
+        }
+    
+        return $attributes;
+    }
+    
+    protected function removeTableFromKey($key)
+    {
+        if (! Text::contains($key, '.')) {
+            return $key;
+        }
+    
+        return last(explode('.', $key));
+    }
+    
+    /**
+     * 是否为可填充数据
+     * 
+     * @param string  $key
+     * @return boolean
+     */
+    public function isFillable(string $key):bool
+    {
+        if (static::$unguarded) {
+            return true;
+        }
+    
+        if (in_array($key, $this->_fields)) {
+            return true;
+        }
+    
+        if ($this->isGuarded($key)) {
+            return false;
+        }
+    
+        return empty($this->_fields) && ! Text::startsWith($key, '_');
+    }
+    
+    /**
+     * 给定的值属否可以批量赋值
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function isGuarded(string $key):bool
+    {
+        return in_array($key, $this->guarded) || $this->guarded == ['*'];
+    }
+    
+    /**
+     * 设置属性
+     * 
+     * @param string $key
+     * @param string|array $value
+     * @return Model
+     */
+    public function setAttribute(string $key, $value)
+    {
+        if ($this->hasSetMutator($key)) {
+            $method = 'set'.Text::studly($key).'Attribute';
+    
+            return $this->{$method}($value);
+        }elseif(Text::startsWith($key, '_')){
+            return $this;
+        } 
+    
+        $this->attributes[$key] = $value;
+    
+        return $this;
+    }
+    
+
+    /**
+     * Determine if a set mutator exists for an attribute.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function hasSetMutator($key)
+    {
+        return method_exists($this, 'set'.Text::studly($key).'Attribute');
+    }
+    
+    /**
+     * 是否需要观察者
+     * 
+     * @return boolean
+     */
+    public function hasNotify()
+    {
+        return method_exists($this, 'notify');
+    }
+    
+    /**
+     * Get all of the current attributes on the model.
+     *
+     * @return array
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+    
+    /**
+     * Set the array of model attributes. No checking is done.
+     *
+     * @param  array  $attributes
+     * @param  bool  $sync
+     * @return $this
+     */
+    public function setRawAttributes(array $attributes, $sync = false)
+    {
+        $this->attributes = $attributes;
+    
+        if ($sync) {
+            $this->syncOriginal();
+        }
+    
+        return $this;
+    }
+    
+    /**
+     * Sync the original attributes with the current.
+     *
+     * @return $this
+     */
+    public function syncOriginal()
+    {
+        $this->original = $this->attributes;
+    
+        return $this;
+    }
+    
+    /**
+     * 获取model的属性值
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        return $this->getAttribute($key);
+    }
+    
+    /**
+     * 将属性值赋给model
+     *
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return void
+     */
+    public function __set($key, $value)
+    {
+        $this->setAttribute($key, $value);
+    }
+    
+    /**
+     * Convert the model instance to JSON.
+     *
+     * @param  int  $options
+     * @return string
+     */
+    public function toJson($options = 0)
+    {
+        return json_encode($this->jsonSerialize(), $options);
+    }
+    
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+    
+    /**
+     * 将model转换成array
+     *
+     * @return array
+     */
+    public function toArray():array
+    {
+        $attributes = $this->attributesToArray();
+    
+        return $attributes;
+    }
+    
+    /**
+     * Convert the model's attributes to an array.
+     *
+     * @return array
+     */
+    public function attributesToArray()
+    {
+        $attributes = $this->getArrayableAttributes();
+    
+        return $attributes;
+    }
+    
+    /**
+     * Get an attribute array of all arrayable attributes.
+     *
+     * @return array
+     */
+    protected function getArrayableAttributes()
+    {
+        return $this->getArrayableItems($this->attributes);
+    }
+    
+    /**
+     * Get an attribute array of all arrayable values.
+     *
+     * @param  array  $values
+     * @return array
+     */
+    protected function getArrayableItems(array $values)
+    {
+        if (count($this->getVisible()) > 0) {
+            return array_intersect_key($values, array_flip($this->getVisible()));
+        }
+    
+        return array_diff_key($values, array_flip($this->getHidden()));
+    }
+    
+    /**
+     * Get an attribute from the model.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function getAttribute($key)
+    {
+        if (array_key_exists($key, $this->attributes)) {
+            return $this->getAttributeValue($key);
+        }
+    }
+    
+    /**
+     * Get a plain attribute (not a relationship).
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function getAttributeValue($key)
+    {
+        $value = $this->getAttributeFromArray($key);
+    
+        return $value;
+    }
+    
+    /**
+     * Get an attribute from the $attributes array.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    protected function getAttributeFromArray($key)
+    {
+        if (array_key_exists($key, $this->attributes)) {
+            return $this->attributes[$key];
+        }
+    }
+    
+    /**
+     * Get the visible attributes for the model.
+     *
+     * @return array
+     */
+    public function getVisible()
+    {
+        return $this->visible;
+    }
+    
+    /**
+     * Set the visible attributes for the model.
+     *
+     * @param  array  $visible
+     * @return $this
+     */
+    public function setVisible(array $visible)
+    {
+        $this->visible = $visible;
+    
+        return $this;
+    }
+    
+    /**
+     * Add visible attributes for the model.
+     *
+     * @param  array|string|null  $attributes
+     * @return void
+     */
+    public function addVisible($attributes = null)
+    {
+        $attributes = is_array($attributes) ? $attributes : func_get_args();
+    
+        $this->visible = array_merge($this->visible, $attributes);
+    }
+    
+    public function addHidden($attributes = null)
+    {
+        $attributes = is_array($attributes) ? $attributes : func_get_args();
+    
+        $this->_hidden = array_merge($this->_hidden, $attributes);
+    }
+    
+    /**
+     * Make the given, typically hidden, attributes visible.
+     *
+     * @param  array|string  $attributes
+     * @return $this
+     */
+    public function withHidden($attributes)
+    {
+        $this->_hidden = array_diff($this->_hidden, (array) $attributes);
+    
+        return $this;
+    }
+    
+    /**
+     * 获取模型隐藏的属性
+     *
+     * @return array
+     */
+    public function getHidden()
+    {
+        return $this->_hidden;
+    }
+    
+    /**
+     * 格式化 需要插入的字段
+     * 
+     * @param array $columns
+     * @return string
+     */
+    public function columnize(array $columns)
+    {
+        return implode(', ', array_map([$this, 'wrap'], $columns));
+    }
+    
+    /**
+     * 格式化需要插入的参数
+     * 
+     * @param array $values
+     * @return string
+     */
+    public function parameterize(array $values)
+    {
+        return implode(', ', array_map([$this, 'parameter'], $values));
+    }
+    
+    /**
+     * 参数形式
+     * 
+     * @param string $value
+     * @param bool $anonymous
+     * @return string
+     */
+    public function parameter($value, bool $anonymous = false)
+    {
+        return $anonymous ? $this->getValue($value) : '?';
+    }
+    
+    public function wrap($value, $prefixAlias = false)
+    {
+        if (strpos(strtolower($value), ' as ') !== false) {
+            $segments = explode(' ', $value);
+    
+            if ($prefixAlias) {
+                $segments[2] = $this->_tablePrefix.$segments[2];
+            }
+    
+            return $this->wrap($segments[0]).' as '.$this->wrapValue($segments[2]);
+        }
+    
+        $wrapped = [];
+    
+        $segments = explode('.', $value);
+    
+        foreach ($segments as $key => $segment) {
+            if ($key == 0 && count($segments) > 1) {
+                $wrapped[] = $this->wrapTable($segment);
+            } else {
+                $wrapped[] = $this->wrapValue($segment);
+            }
+        }
+    
+        return implode('.', $wrapped);
+    }
+    
+    public function wrapTable($table)
+    {
+        return $this->wrap(Database::instance()->table_prefix().$table, true);
+    }
+    
+    /**
+     * Wrap a single string in keyword identifiers.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function wrapValue($value)
+    {
+        if ($value === '*') {
+            return $value;
+        }
+    
+        return '`'.str_replace('"', '""', $value).'`';
+    }
+    
+    /**
+     * Get the value of a raw expression.
+     *
+     *@param string $value
+     * @return string
+     */
+    public function getValue($value)
+    {
+        return ':'.$value;
+    }
+    /**
+     * @return the $_tablePrefix
+     */
+    public function getTablePrefix():string
+    {
+        return $this->_tablePrefix;
+    }
+
+    /**
+     * @param string $_tablePrefix
+     */
+    public function setTablePrefix(string $tablePrefix = NULL)
+    {
+        if(empty($tablePrefix)) {
+            $tablePrefix = 'xcms_';
+        }
+        
+        $this->_tablePrefix = $tablePrefix;
+    }
+    
+    /**
+     * Determine if the given attribute exists.
+     *
+     * @param  mixed  $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->$offset);
+    }
+    
+    /**
+     * Get the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return $this->$offset;
+    }
+    
+    /**
+     * Set the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @param  mixed  $value
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->$offset = $value;
+    }
+    
+    /**
+     * Unset the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->$offset);
+    }
+    
+    /**
+     * Determine if an attribute or relation exists on the model.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        if (isset($this->attributes[$key]) ) {
+            return true;
+        }
+    
+        if (method_exists($this, $key) && $this->$key ) {
+            return true;
+        }
+    
+        return  ! is_null($this->getAttributeValue($key));
+    }
+    
+    /**
+     * Unset an attribute on the model.
+     *
+     * @param  string  $key
+     * @return void
+     */
+    public function __unset($key)
+    {
+        unset($this->attributes[$key]);
+    }
+    
+    /**
+     * 消息通知
+     * 
+     * @param string $event
+     */
+    public function fireEvent(string $event,bool $isFire = FALSE)
+    {
+        if(!$isFire) {
+            if($this->hasNotify()) {
+                $this->_event = $event;
+                $this->notify();  
+            }
+        }
+    }
 }

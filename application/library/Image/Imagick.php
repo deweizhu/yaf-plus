@@ -4,9 +4,9 @@
  *
  * @package    Elixir/Image
  * @category   Drivers
- * @author     Tamas Mihalik tamas.mihalik@gmail.com
+ * @author    知名不具
  * @copyright  (c) 2009-2012 Elixir Team
- * @license    http://Elixirphp.com/license.html
+ * @license
  */
 class Image_Imagick extends Image {
 

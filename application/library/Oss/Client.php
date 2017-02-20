@@ -3,7 +3,9 @@
 /**
  * Class OssClient
  *
- * Object Storage Service(OSS) 的客户端类，简单封装，需服务器支持FastDFS
+ * Object Storage Service(OSS) 的客户端类，封装了用户通过OSS API对OSS服务的各种操作，
+ * 用户通过OssClient实例可以进行Bucket，Object，MultipartUpload, ACL等操作，具体
+ * 的接口规则可以参考官方OSS API文档
  */
 class Oss_Client
 {
@@ -26,12 +28,12 @@ class Oss_Client
     /**
      * 单实例
      *
-     * @return self
+     * @return Oss_Client
      */
-    public static function instance(): self
+    public static function instance(): Oss_Client
     {
-        if (self::$instance === NULL)
-            self::$instance = new self();
+        if (self::$instance === NULL || !self::$instance instanceof Oss_Client)
+            self::$instance = new Oss_Client();
         return self::$instance;
     }
 
@@ -65,8 +67,8 @@ class Oss_Client
         $this->_checkServer($group);
         $file = $this->_fdfs->storage_upload_by_filename($local_file, $file_ext, [], $group, $this->_tracker,
             $this->_storage);
-        if (isset($file['group_name']) && isset($file['filename'])) {
-            $location = $file['group_name'] . '/' . $file['filename'];
+        if (isset($file['filename'])) {
+            $location = $file['filename'];
         }
         if ($location !== '' && !empty($slave_file)) {
             foreach ($slave_file as $key => $val) {
@@ -93,8 +95,8 @@ class Oss_Client
         $this->_checkServer($group);
         $file = $this->_fdfs->storage_upload_by_filebuff($file_buff, $file_ext, [], $group, $this->_tracker,
             $this->_storage);
-        if (isset($file['group_name']) && isset($file['filename'])) {
-            $location = $file['group_name'] . '/' . $file['filename'];
+        if (isset($file['filename'])) {
+            $location = $file['filename'];
         }
         if ($location !== '' && !empty($slave_file)) {
             foreach ($slave_file as $key => $val) {
@@ -102,6 +104,19 @@ class Oss_Client
             }
         }
         return $location;
+    }
+
+    /**
+     * 删除文件
+     * @param string $file_id
+     * @param string $group
+     *
+     * @return bool
+     */
+    public function deleteFile(string $file_id, string $group = 'group1'): bool
+    {
+        $this->_checkServer($group);
+        return $this->_fdfs->storage_delete_file($group, $file_id, $this->_tracker, $this->_storage);
     }
 
 
@@ -119,7 +134,8 @@ class Oss_Client
                 array(':errno' => $this->_fdfs->get_last_error_no(), ':error' => $this->_fdfs->get_last_error_info()));
         }
         if (!$this->_storage) {
-            $this->_storage = $this->_fdfs->tracker_query_storage_store($group, $this->_tracker);
+//            $this->_storage = $this->_fdfs->tracker_query_storage_store($group, $this->_tracker);
+            $this->_storage = $this->_fdfs->tracker_query_storage_store($group);
             if ($server = $this->_fdfs->connect_server($this->_storage['ip_addr'], $this->_storage['port']))
                 $this->_storage['sock'] = $server['sock'];
         }
