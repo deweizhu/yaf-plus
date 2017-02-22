@@ -81,12 +81,12 @@ class Cache_File extends Elixir_Cache implements Cache_GarbageCollect {
 		// PHP < 5.3 exception handle
 		catch (ErrorException $e)
 		{
-			$this->_cache_dir = $this->_make_directory($directory, 0777, TRUE);
+			$this->_cache_dir = $this->_make_directory($directory, 0755, TRUE);
 		}
 		// PHP >= 5.3 exception handle
 		catch (UnexpectedValueException $e)
 		{
-			$this->_cache_dir = $this->_make_directory($directory, 0777, TRUE);
+			$this->_cache_dir = $this->_make_directory($directory, 0755, TRUE);
 		}
 
 		// If the defined directory is a file, get outta here

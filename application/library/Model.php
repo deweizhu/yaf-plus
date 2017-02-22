@@ -24,6 +24,12 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @var string
      */
     protected $_primary = 'id';
+
+    /**
+     * 主键值自增
+     * @var bool
+     */
+    protected $_auto_increment = TRUE;
     /**
      * 表字段
      *
@@ -433,6 +439,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
             } else {
                 $fields = $this->_fields;
             }
+            //新增时过滤自增主键
+            if ($this->_auto_increment && $this->_primary && isset($data[$this->_primary]))
+                unset($data[$this->_primary]);
             $data = Arr::filter_array($data, $fields);
         }
         $this->_create_autofill($data);
