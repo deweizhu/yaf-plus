@@ -86,8 +86,7 @@ class DemoModel extends Model implements SplSubject
      * 修改
      *
      * @param array $data      新内容
-     * @param int   $contentid 内容ID
-     * @param array $options   附加字段
+     * @param int   $id 内容ID
      *
      * @return bool
      */
