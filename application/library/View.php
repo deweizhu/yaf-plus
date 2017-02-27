@@ -47,10 +47,10 @@ class View
             list($context, $uri) = $args;
         if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE) return $uri;
         $file = PUBPATH . $uri;
-        if (!is_file($file) && !is_file($file.'.js')) {
+        if (!is_file($file) && !is_file($file . '.js')) {
             return '';
         }
-        if(is_file($file.'.js')) {
+        if (is_file($file . '.js')) {
             return $uri;
         }
         return $uri . '?_' . filemtime($file);
@@ -146,6 +146,28 @@ class View
         if ($append) {
             $param = array_merge($param, $append);
         }
+        $uri = http_build_query(array_filter($param), '', '&');
+        return $uri;
+    }
+
+    /**
+     * 获取当前请求查询字符串
+     * twig用法：{{ query_string('date=all') }}
+     * {{ query_string('date=all', 'id=123456') }}
+     *
+     * @param array ...$args 格式：array('k=v&k2=v2', ...) 或者 array('k=v', 'k2=v2', ...)
+     *
+     * @return string
+     */
+    public static function query_string(...$args): string
+    {
+        if (Arr::is_array($args[0]))
+            $q = implode('&', array_shift($args));
+        else
+            $q = implode('&', $args);
+        $append = array();
+        parse_str($q, $append);
+        $param = $append ? array_merge($_GET, $append) : $_GET;
         $uri = http_build_query(array_filter($param), '', '&');
         return $uri;
     }

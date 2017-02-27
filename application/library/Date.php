@@ -648,7 +648,7 @@ class Date
             list($year, $month, $day, $day_of_week) = explode(' ', date('Y m d N', $_SERVER['REQUEST_TIME']));
             $result = mktime(0, 0, 0, intval($month), intval($day - ($day_of_week - 1)), intval($year));
         }
-        return date('Y-m-d 00:00:00', $result);
+        return $result;
     }
 
     /**
@@ -663,7 +663,7 @@ class Date
             list($year, $month, $day, $day_of_week) = explode(' ', date('Y m d N', $_SERVER['REQUEST_TIME']));
             $result = mktime(0, 0, 0, intval($month), intval($day - ($day_of_week - 1)), intval($year));
         }
-        return $result;
+        return date('Y-m-d 00:00:00', $result);
     }
 
     /**
