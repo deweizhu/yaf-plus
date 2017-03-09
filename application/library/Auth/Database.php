@@ -35,11 +35,24 @@ class Auth_Database extends Elixir_Auth {
 
         $user = $model->getUser($credentials);
 
-		if(isset($user) && $remember === TRUE) {
-		    array_forget($user, 'password');
-		    return $this->complete_login($user);
-		}
+        if(!empty($user) && $remember === TRUE  && array_has($credentials, 'remember_token') 
+            && $credentials['remember_token'] === $this->_cache->get(crc32($user->id))) {
+            return $this->complete_login($user);
+        }
+        
+        if(!array_has($credentials, 'password')) {
+            return FALSE;
+        }
+        
         if(!empty($user) && bcrypt_check($credentials['password'], $user->password)){
+            $remember_token = '';
+            if(isset($user) && $remember === TRUE) {
+                $remember_token = str_random(32).time();
+                $this->_cache->set(crc32($user->id), $remember_token,86400*7); // 客户端用户记住登录，保持7天
+            }
+            
+            $user->remember_token = $remember_token;
+            $model->afterLogin($user->id);
 		    unset($user->password);
 		    return $this->complete_login($user);
 		}

@@ -61,6 +61,16 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     {
         //在这里注册自己的view控制器，例如smarty,firekylin
         $config = Yaf_Application::app()->getConfig();
-        $dispatcher->setView(new Twig(VIEWPATH, $config->twig->toArray()));
+        $twig = new Twig(VIEWPATH, $config->twig->toArray());
+        $dispatcher->setView($twig);
+        //Twig视图层可调用的“全局函数和变量”
+        $twig->addFunction('asset', 'View::asset');
+        $twig->addFunction('model_get', 'View::model_get');
+        $twig->addFunction('query_string', 'View::query_string');
+        $twig->addGlobal('site', $config->get('site')->toArray());
+        $twig->addGlobal('app', $dispatcher->getRequest()->getModuleName() !== 'Index' ?? '' );
+        $twig->addGlobal('controller', $dispatcher->getRequest()->getControllerName());
+        $twig->addGlobal('action', $dispatcher->getRequest()->getActionName());
+        $twig->addGlobal('requesturi', $dispatcher->getRequest()->getRequestUri());
     }
 }

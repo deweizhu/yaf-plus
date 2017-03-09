@@ -3,7 +3,7 @@
 /**
  * NotFoundHttpException.
  *
- * @author 知名不具
+ * @author Joker
  */
 class Exception_NotFoundHttpException extends Exception_HttpException
 {

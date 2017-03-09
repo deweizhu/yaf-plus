@@ -3,7 +3,7 @@
 /**
  * NotAcceptableHttpException.
  *
- * @author 知名不具
+ * @author Joker
  */
 class Exception_NotAcceptableHttpException extends Exception_HttpException
 {

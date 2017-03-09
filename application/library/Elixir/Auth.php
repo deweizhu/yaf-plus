@@ -15,6 +15,8 @@ abstract class Elixir_Auth {
 	protected $_config;
 
 	protected $name;
+	
+	protected $_cache;
 	/**
 	 * Loads Session and configuration options.
 	 *
@@ -29,6 +31,8 @@ abstract class Elixir_Auth {
         $this->name = $name;		
 
 		$this->_session = Session::instance($this->_config['session_type']);
+		
+		$this->_cache = Cache::instance();
 	}
 
 	abstract protected function _login(array $credentials, bool $remember);

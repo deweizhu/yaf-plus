@@ -304,7 +304,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @param string $fields
      * @param bool   $cache 是否缓存？
      *
-     * @return array
+     * @return string
      */
     public function get($id, string $field, bool $cache = FALSE): string
     {
@@ -380,7 +380,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         $fields = $this->_filter_hidden_fields();
         
-        $sql = 'select '.$fields.' from '.$this->_table.' where id=?';
+        $sql = 'select '.$fields.' from '.$this->_table.' where '.$this->_primary.'=?';
         return  Database::instance()->query(Database::SELECT, $sql,get_class($this),[$id])->current();
     }
     
@@ -982,7 +982,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
             
             $columns = implode(', ', $columns);
             
-            $update_sql = trim("update {$table} set $columns WHERE {$this->_primary}={$this->id}");
+            $primary_id = $this->_primary;
+            
+            $update_sql = trim("update {$table} set $columns WHERE {$this->_primary}={$this->$primary_id}");
             
             Database::instance()->query(Database::UPDATE, $update_sql,get_class($this),array_values($dirty));
             
@@ -1042,7 +1044,8 @@ abstract class Model implements ArrayAccess, JsonSerializable
         if(!empty($options))
             $this->fill($options);       
         
-        if (empty($this->id)) {
+        $primary_id = $this->_primary;
+        if (empty($this->$primary_id)) {
             $saved = $this->performInsert($this->attributes);
         } else {
             $saved = $this->performUpdate($this->attributes);

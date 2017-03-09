@@ -117,4 +117,39 @@ class Twig implements Yaf_View_Interface
     {
         $this->loader->setPaths($templateDir);
     }
+
+
+    /**
+     * 添加全局变量
+     * @param $name
+     * @param $value
+     */
+    public function addGlobal($name, $value = '')
+    {
+        if (is_array($name)) {
+            foreach ($name as $k => $v)
+                $this->twig->addGlobal($k, $v);
+        } else {
+            $this->twig->addGlobal($name, $value);
+        }
+    }
+
+    /**
+     * 添加函数
+     * @param string      $funName
+     * @param string|NULL $InnerFunName
+     * @param bool        $needsContext
+     */
+    public function addFunction(string $funName, string $InnerFunName = NULL, bool $needsContext = FALSE)
+    {
+        if (strpos($funName, '::') !== FALSE)
+            list($InnerClass, $funName) = explode('::', $funName);
+        else
+            $InnerClass = 'View';
+        $InnerFunName === NULL AND $InnerFunName = $funName;
+        $this->twig->addFunction(new Twig_SimpleFunction($funName,
+            array($InnerClass, $InnerFunName),
+            array('needs_context' => $needsContext)
+        ));
+    }
 }

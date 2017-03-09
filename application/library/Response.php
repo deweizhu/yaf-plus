@@ -94,8 +94,7 @@ class Response
      */
     private static function apiJsonResponse($data, int $code = 0, string $msg = '', array $append = array())
     {
-
-        $res = array('code' => $code, 'msg' => $msg);
+        $res = array('error' => $code, 'msg' => $msg);
         if (!empty($data))
             $res['data'] = $data;
         if (!empty($append)) {
@@ -113,6 +112,59 @@ class Response
         exit($val);
     }
 
+    /**
+     *  输出成功JSON消息，code = 0
+     *
+     * @param array  $data 数据
+     * @param string $msg  提示消息
+     * @param array  $append
+     */
+    public static function echoJsonSucess($data, string $msg = '', array $append = array()): bool
+    {
+        self::_haltJsonCode($data, 0, $msg, $append);
+        return FALSE;
+    }
+
+    /**
+     *  输出错误的JSON消息，code = xxx
+     *
+     * @param int    $error 错误代码
+     * @param string $msg   提示消息
+     */
+    public static function echoJsonError(int $error, string $msg): bool
+    {
+        self::_haltJsonCode([], $error, $msg);
+        return FALSE;
+    }
+
+    /**
+     * 输出一个JSON格式的数据后挂起程序
+     *
+     * @param   array  $data
+     * @param   int    $code
+     * @param   string $msg
+     *
+     * @return  void
+     */
+    private static function _haltJsonCode($data, int $code = 0, string $msg = '', array $append = array())
+    {
+        $res = array('code' => $code, 'msg' => $msg);
+        if (!empty($data))
+            $res['data'] = $data;
+        if (!empty($append)) {
+            foreach ($append AS $key => $val) {
+                $res[$key] = $val;
+            }
+        }
+        $val = json_encode($res);
+        //Jquery + Zeptojs jsonp
+        if (isset($_GET['jsoncallback'])) {
+            $val = $_GET['jsoncallback'] . '(' . $val . ')';
+        } elseif (isset($_GET['callback'])) {
+            $val = $_GET['callback'] . '(' . $val . ')';
+        }
+        exit($val);
+    }
     /**
      *  protobuf：返回提示消息
      *

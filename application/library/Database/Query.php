@@ -236,10 +236,6 @@ class Database_Query
             }
         }
         
-        // 增加sql 日志输出
-        $log = Log::instance();
-        $log->add(Log::NOTICE, ':sql',[':sql'=>$sql]);
-        
         // Execute the query
         $result = $db->query($this->_type, $sql, $as_object, $object_params);
         if (isset($cache_key) AND $this->_lifetime > 0) {

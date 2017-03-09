@@ -3,7 +3,7 @@
 /**
  * BadRequestHttpException.
  *
- * @author 知名不具
+ * @author Joker
  */
 class Exception_BadRequestHttpException extends Exception_HttpException
 {

@@ -45,15 +45,19 @@ class View
             $uri = $args[0];
         else
             list($context, $uri) = $args;
-        if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE) return $uri;
-        $file = PUBPATH . $uri;
-        if (!is_file($file) && !is_file($file . '.js')) {
-            return '';
-        }
-        if (is_file($file . '.js')) {
+        //远程URL和min版、生产环境，直接返回
+        if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE || 'product' === Yaf_Application::app()->environ())
             return $uri;
+        //开发环境下加随机数，防止浏览器缓存
+        $file = PUBPATH . $uri;
+        if (is_file($file))
+            $uri .= '?_' . filemtime($file);
+        elseif (is_file($file . '.js')) {
+            //pass
         }
-        return $uri . '?_' . filemtime($file);
+        else
+            $uri = '';
+        return $uri;
     }
 
     /**
@@ -168,7 +172,11 @@ class View
         $append = array();
         parse_str($q, $append);
         $param = $append ? array_merge($_GET, $append) : $_GET;
-        $uri = http_build_query(array_filter($param), '', '&');
+        $uri = http_build_query(array_filter($param, function ($v){
+                if ($v === 0 || $v === '0')
+                    return TRUE;
+                return (bool)$v;
+        }), '', '&');
         return $uri;
     }
 }

@@ -226,14 +226,12 @@ class Valid {
 	{
 		// Do not allow reserved addresses
 		$flags = FILTER_FLAG_NO_RES_RANGE;
-
 		if ($allow_private === FALSE)
-		{
 			// Do not allow private or reserved addresses
 			$flags = $flags | FILTER_FLAG_NO_PRIV_RANGE;
-		}
-
-		return (bool) filter_var($ip, FILTER_VALIDATE_IP, $flags);
+		elseif ($ip === '127.0.0.1')
+            return TRUE;
+        return (bool) filter_var($ip, FILTER_VALIDATE_IP, $flags);
 	}
 
 	/**

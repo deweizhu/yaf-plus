@@ -3,7 +3,7 @@
 /**
  * ServiceUnavailableHttpException.
  *
- * @author 知名不具
+ * @author Joker
  */
 class Exception_ServiceUnavailableHttpException extends Exception_HttpException
 {

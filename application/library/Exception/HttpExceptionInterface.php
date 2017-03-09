@@ -3,7 +3,7 @@
 /**
  * Interface for HTTP error exceptions.
  *
- * @author 知名不具
+ * @author Joker
  */
 interface Exception_HttpExceptionInterface
 {

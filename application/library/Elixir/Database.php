@@ -63,29 +63,25 @@ abstract class Elixir_Database
                 // Load the configuration for this database
                 $config = Yaf_Application::app()->getConfig()->get('database')->$name;
             }
-            if (!isset($config['adapter'])) {
+            if (!$config->adapter) {
                 throw new Elixir_Exception('Database type not defined in :name configuration',
                     array(':name' => $name));
             }
 
-            $_config = array('charset' => $config->charset);
+            $_config = $config->toArray();
             list($_config['type'], $adapter) = explode('_', $config->adapter);
-            $_config['type'] = strtoupper($_config['type']);
-            $dsn = sprintf('%s:host=%s;dbname=%s', $adapter, $config->host, $config->dbname);
+            if ($config->unix_socket)
+                $dsn = sprintf('%s:host=%s;dbname=%s;unix_socket=%s', $adapter, $config->host, $config->dbname, $config->unix_socket);
+            else
+                $dsn = sprintf('%s:host=%s;dbname=%s;', $adapter, $config->host, $config->dbname);
             $_config['connection'] = array(
                 'dsn'        => $dsn,
                 'username'   => $config->username,
                 'password'   => $config->password,
                 'persistent' => $config->persistent,
             );
-            $_config['table_prefix'] = $config->table_prefix;
-            $_config['dbname'] = $config->dbname;
-            // Set the driver class name
-            $driver = 'Database_' . ucfirst($_config['type']);
-            // Create the database connection instance
-            $driver = new $driver($name, $_config);
-            // Store the database instance
-            Database::$instances[$name] = $driver;
+            $driver = ('pdo' === $_config['type']) ? 'Database_PDO' : 'Database_' . ucfirst($_config['type']);
+            Database::$instances[$name] = new $driver($name, $_config);
         }
 
         return Database::$instances[$name];

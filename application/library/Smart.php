@@ -29,6 +29,54 @@ class Smart
     }
 
     /**
+     * 图片预览JSON
+     * @param string $image
+     *
+     * @return string
+     */
+    public static function thumbPreviewJosn(string $image): string
+    {
+        if (!$image)
+            return '[]';
+        static $oss = NULL;
+        if ($oss === NULL) $oss = OssclientModel::instance();
+        $item = array('caption' => '');
+        if (strpos($image, '/M0') !== FALSE) {
+            $filename = parse_url($image, PHP_URL_PATH);
+            $item['url'] = $oss->deleteObjectURL($filename);
+            $item['src'] = $image;
+        } else {
+            $item['src'] = $image;
+            $item['url'] = NULL;
+        }
+        return json_encode(array($item));
+    }
+
+    /**
+     * 图片预览处理
+     * @param array $image
+     *
+     * @return array
+     */
+    public static function thumbPreview(string $image): array
+    {
+        if (!$image)
+            return [];
+        static $oss = NULL;
+        if ($oss === NULL) $oss = OssclientModel::instance();
+        $item = array('caption' => '');
+        if (strpos($image, '/M0') !== FALSE) {
+            $filename = parse_url($image, PHP_URL_PATH);
+            $item['url'] = $oss->deleteObjectURL($filename);
+            $item['src'] = $image;
+        } else {
+            $item['src'] = $image;
+            $item['url'] = NULL;
+        }
+        return $item;
+    }
+
+    /**
      * 上传文件路径转绝对URL
      *
      * @param string $uri

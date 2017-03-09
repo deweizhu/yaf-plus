@@ -3,7 +3,7 @@
 /**
  * MethodNotAllowedHttpException.
  *
- * @author 知名不具
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class Exception_MethodNotAllowedHttpException extends Exception_HttpException
 {

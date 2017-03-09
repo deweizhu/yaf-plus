@@ -3,7 +3,7 @@
 /**
  * AccessDeniedHttpException.
  *
- * @author 知名不具
+ * @author Joker
  */
 class Exception_AccessDeniedHttpException extends Exception_HttpException
 {
