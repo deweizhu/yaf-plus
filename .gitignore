@@ -4,3 +4,5 @@ application/cache/
 application/logs/
 resources/fonts/
 resources/watermark/
+storage/cache/
+storage/logs/
