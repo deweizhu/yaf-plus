@@ -36,8 +36,7 @@ class UserModel extends Model implements SplSubject
 
     protected $_hidden = ['password'];
     protected $_create_autofill = ['created_at' => TIMENOW];
-    private $_foreign_key = 'user_id';
-    private $_foreign_table = 'xcms_role_user';
+
 
     /**
      * 事件通知服务
