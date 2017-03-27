@@ -62,7 +62,7 @@ class UserModel extends Model implements SplSubject
     public function userid(string $username): int
     {
         $val = DB::select('id')->from($this->_table)->where('name', '=', $username)
-            ->limit(1)->cached()->execute(Database::instance())->get('id');
+            ->limit(1)->cached()->execute($this->db)->get('id');
         return $val ? intval($val) : 0;
     }
 
@@ -76,7 +76,7 @@ class UserModel extends Model implements SplSubject
     public function username(int $user_id): string
     {
         $val = DB::select('name')->from($this->_table)->where('id', '=', $user_id)
-            ->limit(1)->cached()->execute(Database::instance())->get('name');
+            ->limit(1)->cached()->execute($this->db)->get('name');
         return $val ?: '';
     }
 
