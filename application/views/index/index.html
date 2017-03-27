@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<h1>Twig is a modern template engine for PHP</h1>
+<form id="myForm" method="post" action="{{ requesturi }}">
+    <ul>
+        <li><input name="name" value="" placeholder="用户名"></li>
+        <li><input name="password" value="" placeholder="密码"></li>
+        <li><input name="password_confirm" value="" placeholder="确认密码"></li>
+    </ul>
+    <button type="submit">新增用户</button>
+</form>
+<script src="http://cdn.staticfile.org/jquery/3.1.1/jquery.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#myForm').submit(function (e) {
+            e.preventDefault();
+            var options = {
+                dataType: 'json',
+                success: function (res) {
+                    if (res.error) {
+                        alert(res.message);
+                    }
+                    else {
+                        alert('操作成功！');
+                    }
+                }
+            };
+            $(this).ajaxSubmit(options);
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

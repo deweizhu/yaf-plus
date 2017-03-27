@@ -150,10 +150,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
     public function __construct(array $attributes = [])
     {
         $this->setTablePrefix($this->_tablePrefix);
-        
         $this->syncOriginal();
-
         $this->fill($attributes);
+        $this->db = Database::instance();
     }
 
     /**
@@ -223,7 +222,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
                 }
             }
         }
-        $data = $query->execute(Database::instance())->result();
+        $data = $query->execute($this->db)->result();
         if (!$data) {
             $this->error_message = 'nothing.';
             return [];
@@ -272,7 +271,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $query = DB::select_array($fields)->from($this->_table);
         $this->where($query, $where);
         $cache AND $query->cached();
-        $result = $query->execute(Database::instance())->result();
+        $result = $query->execute($this->db)->result();
         if (!$result) {
             $this->error_message = 'nothing.';
             return [];
@@ -293,7 +292,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $query = DB::select(DB::expr('COUNT(*) AS total'))->from($this->_table);
         $this->where($query, $where);
         $cache AND $query->cached();
-        $record_count = $query->limit(1)->execute(Database::instance())->get('total');
+        $record_count = $query->limit(1)->execute($this->db)->get('total');
         return $record_count ? intval($record_count) : 0;
     }
 
@@ -310,7 +309,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         $query = DB::select(array($field, 'alias_fiedld'))->from($this->_table)->where($this->_primary, '=', $id)->limit(1);
         $cache AND $query->cached();
-        $data = $query->execute(Database::instance())->get('alias_fiedld', '');
+        $data = $query->execute($this->db)->get('alias_fiedld', '');
         return $data ?: '';
     }
 
@@ -378,10 +377,18 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function find_model(int $id)
     {
-        $fields = $this->_filter_hidden_fields();
+        $key = crc32($this->_table.$id);
         
-        $sql = 'select '.$fields.' from '.$this->_table.' where '.$this->_primary.'=?';
-        return  Database::instance()->query(Database::SELECT, $sql,get_class($this),[$id])->current();
+        if($data = Cache::instance()->get($key)) {
+            return $data;
+        } else {
+            $fields = $this->_filter_hidden_fields();
+            $sql = 'select '.$fields.' from '.$this->_table.' where '.$this->_primary.'=?';
+            $data = $this->db->query(Database::SELECT, $sql,get_class($this),[$id])->current();
+            Cache::instance()->set($key, $data);
+            
+            return $data;
+        }
     }
     
     /**
@@ -420,7 +427,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         if ($limit > 0)
             $sql .= ' LIMIT '.$limit.' OFFSET '.$offset;
         
-        return  Database::instance()->query(Database::SELECT, $sql,get_class($this),$params)->result();
+        return  $this->db->query(Database::SELECT, $sql,get_class($this),$params)->result();
     }
 
     /**
@@ -447,7 +454,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $this->_create_autofill($data);
         try {
             list($insert_id, $affected_rows) = DB::insert($this->_table)->columns(array_keys($data))
-                ->values(array_values($data))->execute(Database::instance());
+                ->values(array_values($data))->execute($this->db);
             $insert_id += 0;
             if ($insert_id === 0 && $affected_rows > 0 && isset($data[$this->_primary]))
                 $insert_id = $data[$this->_primary] + 0;
@@ -471,7 +478,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $this->_readonly($data);
         $this->_update_autofill($data);
         try {
-            DB::update($this->_table)->set($data)->where($this->_primary, '=', $primary_id)->execute(Database::instance());
+            DB::update($this->_table)->set($data)->where($this->_primary, '=', $primary_id)->execute($this->db);
             return TRUE;
         } catch (Exception $e) {
             $this->error_code = $e->getCode();
@@ -492,9 +499,18 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $op = is_array($primary_id) ? 'IN' : '=';
         try {
             if ($this->_softDelete) {
-                DB::update($this->_table)->set([$this->_softDeleteField => time()])->where($this->_primary, $op, $primary_id)->execute(Database::instance());
+                DB::update($this->_table)->set([$this->_softDeleteField => time()])->where($this->_primary, $op, $primary_id)->execute($this->db);
             } else {
-                DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute(Database::instance());
+                DB::delete($this->_table)->where($this->_primary, $op, $primary_id)->execute($this->db);
+            }
+            if(is_array($primary_id)) {
+                foreach ($primary_id as $p) {
+                    $key = crc32($this->_table.$p);
+                    Cache::instance()->delete($key);
+                }
+            } else {
+                $key = crc32($this->_table.$primary_id);
+                Cache::instance()->delete($key);
             }
             return TRUE;
         } catch (Exception $e) {
@@ -517,10 +533,10 @@ abstract class Model implements ArrayAccess, JsonSerializable
         
             $strIds = explode(',', $primary_id);
             
-            $sql = 'UPDATE ' . Database::instance()->table_prefix() . $this->_table . ' set '.$this->_softDeleteField.'=? WHERE id in(?)' ;
+            $sql = 'UPDATE ' . $this->db->table_prefix() . $this->_table . ' set '.$this->_softDeleteField.'=? WHERE id in(?)' ;
         
             try {
-                Database::instance()->query(DATABASE::UPDATE, $sql,FALSE,[0,$strIds]);
+                $this->db->query(DATABASE::UPDATE, $sql,FALSE,[0,$strIds]);
                 return TRUE;
             } catch (Exception $e) {
                 $this->error_code = $e->getCode();
@@ -569,7 +585,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         $query = DB::select(DB::expr('1'))->from($this->_table);
         $this->where($query, $where);
-        $ret = $query->limit(1)->execute(Database::instance())->get('1');
+        $ret = $query->limit(1)->execute($this->db)->get('1');
         return $ret ? TRUE : FALSE;
     }
 
@@ -582,7 +598,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function exists_id(int $primary_id): bool
     {
-        $ret = DB::select(DB::expr('1'))->from($this->_table)->where($this->_primary, '=', $primary_id)->limit(1)->execute(Database::instance())->get('1');
+        $ret = DB::select(DB::expr('1'))->from($this->_table)->where($this->_primary, '=', $primary_id)->limit(1)->execute($this->db)->get('1');
         return $ret ? TRUE : FALSE;
     }
 
@@ -654,7 +670,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function getPrimary()
     {
-        return isset($this->_primary) ? $this->_primary : Database::instance()->get_primary($this->_table);
+        return isset($this->_primary) ? $this->_primary : $this->db->get_primary($this->_table);
     }
 
     /**
@@ -664,7 +680,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      */
     public function getTable(string $alias = '')
     {
-        return $alias ? Database::instance()->quote_table(array(Database::instance()->db_name() . '.' . $this->_table, $alias)) : Database::instance()->quote_table($this->_table);
+        return $alias ? $this->db->quote_table(array($this->db->db_name() . '.' . $this->_table, $alias)) : $this->db->quote_table($this->_table);
     }
 
     /**
@@ -709,7 +725,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             if (is_array($v)) {
                 list($field, $op, $val) = $v;
                 if (strtolower($op) === 'like'):
-                    $query->where(DB::expr('INSTR(' . Database::instance()->quote_column($field) . ', ?1)', ['?1' => $val]), '>', 0);
+                    $query->where(DB::expr('INSTR(' . $this->db->quote_column($field) . ', ?1)', ['?1' => $val]), '>', 0);
                 else:
                     $query->where($field, $op, $val);
                 endif;
@@ -882,10 +898,10 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * 
      *  @param $data
      */
-    private function _filter_hidden_fields()
+    protected function _filter_hidden_fields()
     {
         if(!empty($this->_fields)) {
-            $this->_fields = array_merge($this->_fields,[$this->_primary]);
+            $this->_fields = array_unique(array_merge($this->_fields,[$this->_primary]));
             
             if(!empty($this->_hidden)) {
                 Arr::filter_array($this->_fields, $this->_hidden);
@@ -907,16 +923,22 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @param array $values
      * @return Model
      */
-    protected function performInsert(array $values)
+    protected function performInsert(array $values = [])
     {
         $table = $this->_table;
         
         $this->fireEvent('creating');
         
+        foreach ($this->attributes as $key=>$val) {
+            if(in_array($key, array_merge($this->_fields,[$this->_primary]))) {
+                $values[$key] = $val;
+            }
+        }
+        
         if(!empty($this->_create_autofill)) {
             $values = array_merge($values,$this->_create_autofill);
         }
-        
+
         if (! is_array(reset($values))) {
             $values = [$values];
         } else {
@@ -946,7 +968,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
         
         $insert_sql = "INSERT INTO $table ($columns) values $parameters";
         
-        list($insert_id,$row) = Database::instance()->query(Database::INSERT, $insert_sql,get_class($this),array_values($bindings));
+        list($insert_id,$row) = $this->db->query(Database::INSERT, $insert_sql,get_class($this),array_values($bindings));
 
         $this->setAttribute($this->_primary, $insert_id);
         
@@ -961,7 +983,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
      * @param array $values
      * @return Model
      */
-    protected function performUpdate(array $values)
+    protected function performUpdate(array $values = [])
     {
         $this->fireEvent('updating');
         
@@ -982,14 +1004,17 @@ abstract class Model implements ArrayAccess, JsonSerializable
             
             $columns = implode(', ', $columns);
             
-            $primary_id = $this->_primary;
+            $primary_id = $this->{$this->_primary};
             
-            $update_sql = trim("update {$table} set $columns WHERE {$this->_primary}={$this->$primary_id}");
+            $update_sql = trim("update {$table} set $columns WHERE {$this->_primary}={$primary_id}");
             
-            Database::instance()->query(Database::UPDATE, $update_sql,get_class($this),array_values($dirty));
+            $this->db->query(Database::UPDATE, $update_sql,get_class($this),array_values($dirty));
             
             $this->fireEvent('updated');
-            
+            $key = crc32($this->_table.$primary_id);
+            if(Cache::instance()->get($key)) {
+                Cache::instance()->set($key, $this);
+            }
         }
         
         return $this;
@@ -1005,10 +1030,12 @@ abstract class Model implements ArrayAccess, JsonSerializable
         $dirty = [];
     
         foreach ($this->attributes as $key => $value) {
-            if (! array_key_exists($key, $this->original)) {
-                $dirty[$key] = $value;
-            } elseif ($value !== $this->original[$key] && ! $this->originalIsNumericallyEquivalent($key)) {
+            if(in_array($key, array_merge($this->_fields,[$this->_primary]))) {
+                if (! array_key_exists($key, $this->original)) {
                     $dirty[$key] = $value;
+                } elseif ($value !== $this->original[$key] && ! $this->originalIsNumericallyEquivalent($key)) {
+                        $dirty[$key] = $value;
+                }
             }
         }
     
@@ -1046,9 +1073,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
         
         $primary_id = $this->_primary;
         if (empty($this->$primary_id)) {
-            $saved = $this->performInsert($this->attributes);
+            $saved = $this->performInsert();
         } else {
-            $saved = $this->performUpdate($this->attributes);
+            $saved = $this->performUpdate();
         }
         
         $this->fireEvent('saved');
@@ -1105,7 +1132,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             return $key;
         }
     
-        return last(explode('.', $key));
+        return end(explode('.', $key));
     }
     
     /**
@@ -1155,9 +1182,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
             $method = 'set'.Text::studly($key).'Attribute';
     
             return $this->{$method}($value);
-        }elseif(Text::startsWith($key, '_')){
-            return $this;
-        } 
+        }
     
         $this->attributes[$key] = $value;
     
@@ -1487,7 +1512,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     
     public function wrapTable($table)
     {
-        return $this->wrap(Database::instance()->table_prefix().$table, true);
+        return $this->wrap($this->db->table_prefix().$table, true);
     }
     
     /**

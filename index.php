@@ -5,9 +5,8 @@
 define('DOCROOT', __DIR__);
 define('SYSPATH', __DIR__);
 define('APPPATH', __DIR__ . '/application');
-define('MODPATH', APPPATH . '/library');
 define('PUBPATH', __DIR__ . '/public');
-define('VIEWPATH', PUBPATH . '/views');
+define('VIEWPATH', APPPATH . '/views');
 define('STORAGEPATH', __DIR__ . '/storage');
 define('RESPATH', __DIR__ . '/resources');
 

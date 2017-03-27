@@ -1,0 +1,31 @@
+{
+  "name": "yaf-plus",
+  "description": "yaf++ 包含kohana核心类库, twig模板引擎，是yaf框架的增强版",
+  "keywords": [
+    "yaf",
+    "yaf-plus",
+    "zhudewei1985"
+  ],
+  "license": "MIT",
+  "type": "project",
+  "authors": [
+    {
+      "name": "zdw",
+      "email": "zhudewei@outlook.com",
+      "homepage": "https://github.com/zhudewei1985/yaf-plus",
+      "role": "Architects"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0",
+    "yaf": "*"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+    }
+  },
+  "autoload-dev": {
+  }
+}

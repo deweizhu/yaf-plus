@@ -253,7 +253,7 @@ abstract class Elixir_Cache {
 	 * @param   integer  $lifetime  lifetime in seconds
 	 * @return  boolean
 	 */
-	abstract public function set($id, $data, $lifetime = 3600);
+	abstract public function set($id, $data, $lifetime = NULL);
 
 	/**
 	 * Delete a cache entry based on id

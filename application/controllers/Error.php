@@ -26,7 +26,7 @@ class ErrorController extends Yaf_Controller_Abstract
                 break;
             default :
 //                $message = $exception->getMessage();
-                Kohana_Exception::handler($exception);
+                Elixir_Exception::handler($exception);
                 break;
         }
 

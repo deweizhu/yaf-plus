@@ -142,8 +142,8 @@ class Twig implements Yaf_View_Interface
      */
     public function addFunction(string $funName, string $InnerFunName = NULL, bool $needsContext = FALSE)
     {
-        if (strpos($funName, '::') !== FALSE)
-            list($InnerClass, $funName) = explode('::', $funName);
+        if (strpos($InnerFunName, '::') !== FALSE)
+            list($InnerClass, $InnerFunName) = explode('::', $InnerFunName);
         else
             $InnerClass = 'View';
         $InnerFunName === NULL AND $InnerFunName = $funName;

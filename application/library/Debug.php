@@ -256,9 +256,9 @@ class Debug {
 		{
 			$file = 'SYSPATH'.substr($file, strlen(SYSPATH));
 		}
-		elseif (strpos($file, MODPATH) === 0)
+		elseif (strpos($file, APPPATH. DIRECTORY_SEPARATOR.'library') === 0)
 		{
-			$file = 'MODPATH'.substr($file, strlen(MODPATH));
+            $file = 'LIBRARY' . substr($file, strlen(APPPATH . DIRECTORY_SEPARATOR . 'library'));
 		}
 		elseif (strpos($file, DOCROOT) === 0)
 		{

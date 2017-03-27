@@ -139,7 +139,7 @@ class Cache_Redis extends Cache implements Cache_Tagging
      * @param mixed  $data     caching value
      * @param int    $lifetime life time seconds
      */
-    public function set($id, $data, $lifetime = null)
+    public function set($id, $data, $lifetime = NULL)
     {
         if (is_array($id))
         {
@@ -152,8 +152,10 @@ class Cache_Redis extends Cache implements Cache_Tagging
         else
         {
             $id = $this->_sanitize_id($id);
-            $this->_redis->mset([$id => $data]);
-            $this->_set_ttl($id, $lifetime);
+            if ($lifetime !== NULL)
+              $this->_redis->setex($id, $lifetime, $data);
+            else
+              $this->_redis->set($id, $data);
         }
 
         return true;
@@ -179,6 +181,7 @@ class Cache_Redis extends Cache implements Cache_Tagging
     {
         return $this->_redis->flushdb();
     }
+
 
     /**
      * Set the lifetime

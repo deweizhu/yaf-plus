@@ -16,8 +16,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     public function _initConfig()
     {
         //运行环境
-//        $environ = Yaf_Application::app()->environ();
-//        Yaf_Registry::set('setting', new Yaf_Config_Ini(DOCROOT . '/conf/setting.ini', $environ));
+        Yaf_Registry::set('site', new Yaf_Config_Ini(DOCROOT . '/conf/site.ini', YAF_ENVIRON));
 
         /**
          * 设置默认时区
@@ -42,6 +41,8 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
             Cookie::$path = $cookie->get('path') ?: '/';
         }
         Cache::$default = $config->get('cache.default');
+        //composer
+        is_file(DOCROOT . '/vendor/autoload.php') AND Yaf_Loader::import(DOCROOT . '/vendor/autoload.php');
     }
 
     public function _initPlugin(Yaf_Dispatcher $dispatcher)
@@ -64,10 +65,11 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         $twig = new Twig(VIEWPATH, $config->twig->toArray());
         $dispatcher->setView($twig);
         //Twig视图层可调用的“全局函数和变量”
-        $twig->addFunction('asset', 'View::asset');
-        $twig->addFunction('model_get', 'View::model_get');
-        $twig->addFunction('query_string', 'View::query_string');
-        $twig->addGlobal('site', $config->get('site')->toArray());
+        $_methods = get_class_methods('View');
+        array_walk($_methods, function ($fun) use ($twig) {
+            $twig->addFunction($fun, 'View::' . $fun);
+        });
+        $twig->addGlobal('site', Yaf_Registry::get('site')->toArray());
         $twig->addGlobal('app', $dispatcher->getRequest()->getModuleName() !== 'Index' ?? '' );
         $twig->addGlobal('controller', $dispatcher->getRequest()->getControllerName());
         $twig->addGlobal('action', $dispatcher->getRequest()->getActionName());

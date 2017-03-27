@@ -5,34 +5,13 @@
  *
  * @author    知名不具
  * @date      : 2015-11-26
- * @version   : $Id: View.php 666 2015-12-08 12:00:05Z zhudewei $
  */
 class View
 {
-
-    /**
-     * 给Twig模板分配自定义函数
-     *
-     * @param object $ctl          控制器，用$this传递过来即可
-     * @param string $funName      twig模板中使用的函数名
-     * @param string $InnerFunName 映射到静态方法名
-     * @param string $InnerClass   映射到类名
-     * @param bool   $needsContext 是否包含上下文变量
-     */
-    public static function twigFunction($ctl, string $funName, string $InnerFunName = NULL, string $InnerClass = NULL,
-                                        bool $needsContext = FALSE)
-    {
-        $InnerFunName === NULL AND $InnerFunName = $funName;
-        $InnerClass === NULL AND $InnerClass = 'View';
-        $ctl->getView()->getTwig()->addFunction(new Twig_SimpleFunction($funName,
-            array($InnerClass, $InnerFunName),
-            array('needs_context' => $needsContext)
-        ));
-    }
-
     /**
      * 使用方法：
      * <?php echo View::asset('/asset/gmu/zepto.min.js'); ?>
+     * 在twig下使用：{{ asset('/asset/gmu/zepto.min.js') }}
      * asset/*.js,*.css文件URI处理，避免文件变更后浏览器缓存问题
      *
      * @param $uri
@@ -87,14 +66,6 @@ class View
         }
         $id += 0;
         return $class::instance()->get($id, $filed, TRUE);
-    }
-
-    /**
-     *
-     */
-    public function permission()
-    {
-
     }
 
     /**

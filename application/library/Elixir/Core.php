@@ -209,7 +209,7 @@ class Elixir_Core
         if (!Elixir::$log instanceof Log) {
             Elixir::$log = Log::instance();
             Elixir_Exception::$log = Log::instance();
-            Elixir_Exception::$error_view = MODPATH . '/Elixir/Error.php';
+            Elixir_Exception::$error_view = __DIR__ . '/Error.php';
             /**
              * Attach the file write to logging. Multiple writers are supported.
              */
