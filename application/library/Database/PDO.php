@@ -149,13 +149,8 @@ class Database_PDO extends Database {
 				),
 				$e->getCode());
 		}
-
 		// Set the last query
 		$this->last_query = $sql;
-		
-		$log = Log::instance();
-		$log->add(Log::NOTICE, ':sql',[':sql'=>$sql]);
-		
 	    $sth->execute($params);
 
 		if ($type === Database::SELECT)
