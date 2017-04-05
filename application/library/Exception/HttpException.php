@@ -3,7 +3,7 @@
 /**
  * HttpException.
  *
- * @author Joker
+ * @author 知名不具
  */
 class Exception_HttpException extends Exception implements Exception_HttpExceptionInterface
 {

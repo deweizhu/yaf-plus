@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Joker
+ * @author 知名不具
  *  用户 密码加密
  */
 class BcryptHasher

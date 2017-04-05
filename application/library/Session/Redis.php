@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 /**
- * @author Joker
+ * @author 知名不具
  *
  * session redis or memcache
  */
