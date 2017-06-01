@@ -59,7 +59,9 @@ class Elixir_DB {
 	 */
 	public static function select($columns = NULL)
 	{
-		return new Database_Query_Builder_Select(func_get_args());
+	    //兼容'id, username'写法
+        $columns = is_string($columns) ? explode(',', $columns) : func_get_args();
+		return new Database_Query_Builder_Select($columns);
 	}
 
 	/**

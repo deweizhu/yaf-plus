@@ -26,6 +26,8 @@ abstract class Elixir_Database
     const UPDATE = 3;
     const DELETE = 4;
 
+    protected $transactions = 0;
+    
     /**
      * @var  string  default instance name
      */
@@ -63,25 +65,29 @@ abstract class Elixir_Database
                 // Load the configuration for this database
                 $config = Yaf_Application::app()->getConfig()->get('database')->$name;
             }
-            if (!$config->adapter) {
+            if (!isset($config['adapter'])) {
                 throw new Elixir_Exception('Database type not defined in :name configuration',
                     array(':name' => $name));
             }
 
-            $_config = $config->toArray();
+            $_config = array('charset' => $config->charset);
             list($_config['type'], $adapter) = explode('_', $config->adapter);
-            if ($config->unix_socket)
-                $dsn = sprintf('%s:host=%s;dbname=%s;unix_socket=%s', $adapter, $config->host, $config->dbname, $config->unix_socket);
-            else
-                $dsn = sprintf('%s:host=%s;dbname=%s;', $adapter, $config->host, $config->dbname);
+            $_config['type'] = strtoupper($_config['type']);
+            $dsn = sprintf('%s:host=%s;dbname=%s', $adapter, $config->host, $config->dbname);
             $_config['connection'] = array(
                 'dsn'        => $dsn,
                 'username'   => $config->username,
                 'password'   => $config->password,
                 'persistent' => $config->persistent,
             );
-            $driver = ('pdo' === $_config['type']) ? 'Database_PDO' : 'Database_' . ucfirst($_config['type']);
-            Database::$instances[$name] = new $driver($name, $_config);
+            $_config['table_prefix'] = $config->table_prefix;
+            $_config['dbname'] = $config->dbname;
+            // Set the driver class name
+            $driver = 'Database_' . ucfirst($_config['type']);
+            // Create the database connection instance
+            $driver = new $driver($name, $_config);
+            // Store the database instance
+            Database::$instances[$name] = $driver;
         }
 
         return Database::$instances[$name];
@@ -93,7 +99,7 @@ abstract class Elixir_Database
     public $last_query;
 
     // Character that is used to quote identifiers
-    protected $_identifier = '"';
+    protected $_identifier = '`';
 
     // Instance name
     protected $_instance;
@@ -473,9 +479,9 @@ abstract class Elixir_Database
             }
         } elseif (is_array($value)) {
             return '(' . implode(', ', array_map(array($this, __FUNCTION__), $value)) . ')';
-        } elseif (is_int($value)) {
+        } elseif (is_numeric($value) AND is_int($value+0)) {
             return (int)$value;
-        } elseif (is_float($value)) {
+        } elseif (is_numeric($value) AND is_float($value+0)) {
             // Convert to non-locale aware float to prevent possible commas
             return sprintf('%F', $value);
         }
@@ -504,14 +510,12 @@ abstract class Elixir_Database
      */
     public function quote_column($column): string
     {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
-
+        // 给列名加``转义符
+        $_identifier = '`';
         if (is_array($column)) {
             list($column, $alias) = $column;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            $alias = str_replace($_identifier, '', $alias);
         }
-
         if ($column instanceof Database_Query) {
             // Create a sub-query
             $column = '(' . $column->compile($this) . ')';
@@ -521,14 +525,11 @@ abstract class Elixir_Database
         } else {
             // Convert to a string
             $column = (string)$column;
-
-            $column = str_replace($this->_identifier, $escaped_identifier, $column);
-
+            $column = str_replace($_identifier, '', $column);
             if ($column === '*') {
                 return $column;
             } elseif (strpos($column, '.') !== FALSE) {
                 $parts = explode('.', $column);
-
                 if ($prefix = $this->table_prefix()) {
                     // Get the offset of the table name, 2nd-to-last part
                     $offset = count($parts) - 2;
@@ -540,20 +541,18 @@ abstract class Elixir_Database
                 foreach ($parts as & $part) {
                     if ($part !== '*') {
                         // Quote each of the parts
-                        $part = $this->_identifier . $part . $this->_identifier;
+                        $part = $_identifier . $part . $_identifier;
                     }
                 }
-
                 $column = implode('.', $parts);
             } else {
-                $column = $this->_identifier . $column . $this->_identifier;
+                $column = $_identifier . $column . $_identifier;
             }
         }
 
         if (isset($alias)) {
-            $column .= ' AS ' . $this->_identifier . $alias . $this->_identifier;
+            $column .= ' AS ' . $_identifier . $alias . $_identifier;
         }
-
         return $column;
     }
 

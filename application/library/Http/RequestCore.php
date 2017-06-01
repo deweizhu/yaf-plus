@@ -5,6 +5,7 @@
  * 用法：
  *        $request = new Http_RequestCore('http://www.baidu.com');
  *        //$request->set_method('POST');
+ *        // $request->set_curlopts([CURLOPT_COOKIEFILE=> $cookiefile, CURLOPT_COOKIEJAR => $cookiefile ]);
  *        //$request->set_body($postData);
  *        //$request->set_read_file($filepath); //上传文件
  *         $request->send_request();
