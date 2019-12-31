@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php
 /**
  * File Auth driver.
  * [!!] this Auth driver does not support roles nor autologin.
  *
  * @package    Elixir/Auth
- * @author     Elixir Team
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */

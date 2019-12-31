@@ -1,204 +1,126 @@
 <?php
-
 /**
- *  输出JSON/buffer等
+ *  http输出响应
+ *  注意：swoole不能使用exit，控制器中代码return false即可
+ * @author Not well-known man
  */
+
+use Symfony\Component\HttpFoundation\Response AS sfResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+
 class Response
 {
-    /**
-     *   生成JSON格式的正确消息
-     *
-     * @param string|array $content
-     * @param string       $message
-     * @param array        $append
-     */
-    public static function jsonResult($content, string $message = '', array $append = array())
-    {
-        self::jsonResponse($content, 0, $message, $append);
-        return FALSE;
-    }
-
-    /**
-     * 创建一个JSON格式的错误信息
-     *
-     * @param string $msg
-     */
-    public static function jsonError(string $msg, array $append = array())
-    {
-        self::jsonResponse('', 1, $msg, $append);
-        return FALSE;
-    }
-
-    /**
-     * 创建一个JSON格式的数据
-     *
-     * @param   string|array $content
-     * @param   int          $error
-     * @param   string       $message
-     * @param   array        $append
-     *
-     * @return  void
-     */
-    private static function jsonResponse($content = '', int $error = 0, string $message = '', array $append = array())
-    {
-        $res = array('error' => $error, 'message' => $message);
-        if ($error !== 1) $res['content'] = $content;
-        if (!empty($append)) {
-            foreach ($append AS $key => $val) {
-                $res[$key] = $val;
-            }
-        }
-        $val = json_encode($res);
-        //Jquery + Zeptojs jsonp
-        if (isset($_GET['jsoncallback'])) {
-            $val = $_GET['jsoncallback'] . '(' . $val . ')';
-        } elseif (isset($_GET['callback'])) {
-            $val = $_GET['callback'] . '(' . $val . ')';
-        }
-        exit($val);
-    }
 
     /**
      *  API接口：生成JSON格式的正确消息
      *
-     * @param array  $data 数据
-     * @param string $msg  提示消息
-     * @param array  $append
+     * @param array $data 数据
+     * @param string $msg 提示消息
+     * @param array $append
+     * @return bool
      */
     public static function apiJsonResult($data, string $msg = '', array $append = array()): bool
     {
-        self::apiJsonResponse($data, 0, $msg, $append);
-        return TRUE;
+        $content = array('error' => 0, 'msg' => $msg);
+        $content['data'] = $data;
+        if (!empty($append)) {
+            foreach ($append AS $key => $val) {
+                $content[$key] = $val;
+            }
+        }
+        return self::json($content);
     }
 
     /**
      *  API接口：创建一个JSON格式的错误信息
      *
-     * @param int    $error 错误代码
-     * @param string $msg   提示消息
+     * @param int $error 错误代码
+     * @param string $msg 提示消息
+     * @return bool
      */
     public static function apiJsonError(int $error, string $msg): bool
     {
-        self::apiJsonResponse([], $error, $msg);
-        return FALSE;
+        $content = array('error' => $error, 'msg' => $msg);
+        $content['data'] = [];
+        return self::json($content);
     }
 
-    /**
-     * 创建一个JSON格式的数据
-     *
-     * @param   array  $data
-     * @param   int    $code
-     * @param   string $msg
-     *
-     * @return  void
-     */
-    private static function apiJsonResponse($data, int $code = 0, string $msg = '', array $append = array())
-    {
-        $res = array('error' => $code, 'msg' => $msg);
-        if (!empty($data))
-            $res['data'] = $data;
-        if (!empty($append)) {
-            foreach ($append AS $key => $val) {
-                $res[$key] = $val;
-            }
-        }
-        $val = json_encode($res);
-        //Jquery + Zeptojs jsonp
-        if (isset($_GET['jsoncallback'])) {
-            $val = $_GET['jsoncallback'] . '(' . $val . ')';
-        } elseif (isset($_GET['callback'])) {
-            $val = $_GET['callback'] . '(' . $val . ')';
-        }
-        exit($val);
-    }
 
     /**
-     *  输出成功JSON消息，code = 0
-     *
-     * @param array  $data 数据
-     * @param string $msg  提示消息
-     * @param array  $append
-     */
-    public static function echoJsonSucess($data, string $msg = '', array $append = array()): bool
-    {
-        self::_haltJsonCode($data, 0, $msg, $append);
-        return FALSE;
-    }
-
-    /**
-     *  输出错误的JSON消息，code = xxx
-     *
-     * @param int    $error 错误代码
-     * @param string $msg   提示消息
-     */
-    public static function echoJsonError(int $error, string $msg): bool
-    {
-        self::_haltJsonCode([], $error, $msg);
-        return FALSE;
-    }
-
-    /**
-     * 输出一个JSON格式的数据后挂起程序
-     *
-     * @param   array  $data
-     * @param   int    $code
-     * @param   string $msg
-     *
-     * @return  void
-     */
-    private static function _haltJsonCode($data, int $code = 0, string $msg = '', array $append = array())
-    {
-        $res = array('code' => $code, 'msg' => $msg);
-        if (!empty($data))
-            $res['data'] = $data;
-        if (!empty($append)) {
-            foreach ($append AS $key => $val) {
-                $res[$key] = $val;
-            }
-        }
-        $val = json_encode($res);
-        //Jquery + Zeptojs jsonp
-        if (isset($_GET['jsoncallback'])) {
-            $val = $_GET['jsoncallback'] . '(' . $val . ')';
-        } elseif (isset($_GET['callback'])) {
-            $val = $_GET['callback'] . '(' . $val . ')';
-        }
-        exit($val);
-    }
-    /**
-     *  protobuf：返回提示消息
-     *
-     * @param string $code 错误代码
-     * @param string $msg  提示消息
-     */
-    public static function protobufResponse($code, $msg)
-    {
-        if (!headers_sent()) {
-            header('Content-Type:application/octet-stream');
-            header('code:' . intval($code));
-        }
-        $pbres = new Proto_ErrorModel();
-        $pbres->setCode(intval($code));
-        $pbres->setMsg($msg);
-        echo $pbres->serializeToString();
-        exit();
-    }
-    
-    /**
-     * 跳出
-     * 
+     * 输出HTML内容
+     * @param string $content
      * @param int $code
-     * @param string $message
-     * @param array $headers
-     * @throws Exception_NotFoundHttpException
-     * @throws Exception_HttpException
+     * @return bool
      */
-    public static function abort(int $code, $message = '', array $headers = [])
+    public static function html(string $content, int $code = sfResponse::HTTP_OK)
     {
-        if ($code == 404) {
-            throw new Exception_NotFoundHttpException($message);
+        $response = new sfResponse($content, $code, array('content-type' => 'text/html'));
+        $response->send();
+        return FALSE;
+    }
+
+    /**
+     * 输出JSON
+     * @param array $data
+     * @param int $code
+     * @return bool
+     */
+    public static function json(array $data, int $code = sfResponse::HTTP_OK)
+    {
+        $response = new JsonResponse();
+        $response->setData($data);
+        //跨域 Jquery + Zeptojs jsonp
+        if (Request::getQuery('jsoncallback'))
+            $response->setCallback('jsoncallback');
+        elseif (Request::getQuery('callback'))
+            $response->setCallback('callback');
+        $response->send();
+        return FALSE;
+    }
+
+    /**
+     * 输出文本
+     * @param string $content
+     * @param int $code
+     * @return bool
+     */
+    public static function text(string $content, int $code = sfResponse::HTTP_OK)
+    {
+        $response = new sfResponse($content, $code, array('content-type' => 'text/html'));
+        $response->send();
+        return FALSE;
+    }
+
+    /**
+     * @param string $msg
+     * @throws Exception
+     * @deprecated 暂时不建议使用
+     */
+    public static function exit(string $msg)
+    {
+        //php-fpm的环境
+        if (PHP_SAPI === 'fpm-fcgi') {
+            exit($msg);
+        } //swoole的环境
+        else {
+            throw new Exception($msg);
         }
-    
-        throw new Exception_HttpException($code, $message, null, $headers);
+    }
+
+    /**
+     * 设置响应输出头信息
+     * @param string $key
+     * @param string $value
+     */
+    public static function header(string $key, string $value)
+    {
+        if (PHP_SWOOLE) {
+            HttpServer::$response->header($key, $value);
+            return;
+        }
+//        if (!headers_sent()) {
+        header($key . ':' . $value);
+//        }
     }
 }

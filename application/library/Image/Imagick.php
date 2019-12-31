@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Support for image manipulation using [Imagick](http://php.net/Imagick).
  *
  * @package    Elixir/Image
  * @category   Drivers
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2009-2012 Elixir Team
  * @license
  */

@@ -1,11 +1,11 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 
 /**
  * Database query builder for SELECT statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
  * @package    Elixir/Database
  * @category   Query
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -392,6 +392,39 @@ class Database_Query_Builder_Select extends Database_Query_Builder_Where
             $query .= ' HAVING ' . $this->_compile_conditions($db, $this->_having);
         }
 
+        if (!empty($this->_union)) {
+            $query = '(' . $query . ')';
+            foreach ($this->_union as $u) {
+                $query .= ' UNION ';
+                if ($u['all'] === TRUE) {
+                    $query .= 'ALL ';
+                }
+                $query .= '(' . $u['select']->compile($db) . ')';
+            }
+        }
+
+        //MySQL分页
+        if (Database::isMySQL()) {
+            $query = $this->compileMySQL($query, $db);
+        } elseif (Database::isMSSQL()) {
+            //MSSQL分页
+            $query = $this->compileMSSQL($query, $db);
+        }
+
+        $this->_sql = $query;
+
+        return parent::compile($db);
+    }
+
+    /**
+     * MySQL分页处理
+     *
+     * @param string $query
+     * @param null $db
+     * @return string
+     */
+    public function compileMySQL(string $query, $db = NULL)
+    {
         if (!empty($this->_order_by)) {
             // Add sorting
             $query .= ' ' . $this->_compile_order_by($db, $this->_order_by);
@@ -406,22 +439,48 @@ class Database_Query_Builder_Select extends Database_Query_Builder_Where
             // Add offsets
             $query .= ' OFFSET ' . $this->_offset;
         }
+        return $query;
+    }
 
-        if (!empty($this->_union)) {
-            $query = '(' . $query . ')';
-            foreach ($this->_union as $u) {
-                $query .= ' UNION ';
-                if ($u['all'] === TRUE) {
-                    $query .= 'ALL ';
-                }
-                $query .= '(' . $u['select']->compile($db) . ')';
-            }
+    /**
+     *  MSSQL  分页处理
+     * @param string $query
+     * @param null $db
+     * @return mixed
+     */
+    public function compileMSSQL(string $query, $db = NULL)
+    {
+
+        $orderby = '';
+        if (!empty($this->_order_by)) {
+            $orderby = ' ' . $this->_compile_order_by($db, $this->_order_by);
         }
 
-        $this->_sql = $query;
+        //分页+排序
+        if ($this->_limit !== NULL && $this->_offset !== NULL && $orderby) {
+            $sql = <<<EOT
+SELECT TOP
+	{$this->_limit} o.* 
+FROM
+	( SELECT row_number () OVER ( {$orderby} ) AS rownumber,* FROM ( {$query} ) AS ot
+	 ) AS o 
+WHERE
+	rownumber > {$this->_offset}
+EOT;
+            return $sql;
+        }
+        //TOP n
+        if ($this->_limit !== NULL && $pos = strpos($query, 'SELECT') !== FALSE) {
+            // $sql = str_replace('SELECT ', 'SELECT TOP '. $this->_limit, $query);
+            $query = 'SELECT TOP ' . $this->_limit . ' ' . substr($query, $pos + 6);
+        }
+        //排序
+        if ($orderby)
+            $query .= $orderby;
 
-        return parent::compile($db);
+        return $query;
     }
+
 
     public function reset()
     {

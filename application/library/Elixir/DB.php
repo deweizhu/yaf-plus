@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Provides a shortcut to get Database related objects for [making queries](../database/query).
  *
@@ -15,7 +15,7 @@
  *
  * @package    Elixir/Database
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2009 Elixir Team
  * @license
  */

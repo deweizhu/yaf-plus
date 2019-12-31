@@ -2,9 +2,9 @@
 
 /**
  * URI
- * @author    知名不具
- * @date: 2015-12-17
- * @version: $Id: Uri.php 1232 2015-12-17 08:51:31Z zhudewei $
+ * @author    Not well-known man
+ *
+ *
  */
 class Uri
 {

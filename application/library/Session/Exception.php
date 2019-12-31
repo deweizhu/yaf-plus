@@ -1,8 +1,8 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * @package    Elixir
  * @category   Exceptions
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2009-2012 Elixir Team
  * @license
  */

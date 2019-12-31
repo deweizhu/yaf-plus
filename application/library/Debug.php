@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Contains debugging and dumping tools.
  *
  * @package    Elixir
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -240,7 +240,7 @@ class Debug {
 	 * replacing them with the plain text equivalents. Useful for debugging
 	 * when you want to display a shorter path.
 	 *
-	 *     // Displays SYSPATH/classes/Elixir.php
+	 *     // Displays library/Elixir.php
 	 *     echo Debug::path(Elixir::find_file('classes', 'Elixir'));
 	 *
 	 * @param   string  $file   path to debug
@@ -252,13 +252,9 @@ class Debug {
 		{
 			$file = 'APPPATH'.substr($file, strlen(APPPATH));
 		}
-		elseif (strpos($file, SYSPATH) === 0)
+		elseif (strpos($file, MODPATH) === 0)
 		{
-			$file = 'SYSPATH'.substr($file, strlen(SYSPATH));
-		}
-		elseif (strpos($file, APPPATH. DIRECTORY_SEPARATOR.'library') === 0)
-		{
-            $file = 'LIBRARY' . substr($file, strlen(APPPATH . DIRECTORY_SEPARATOR . 'library'));
+			$file = 'MODPATH'.substr($file, strlen(MODPATH));
 		}
 		elseif (strpos($file, DOCROOT) === 0)
 		{

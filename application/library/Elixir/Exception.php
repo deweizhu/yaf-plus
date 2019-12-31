@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Elixir exception class. Translates exceptions using the [I18n] class.
  *
  * @package    Elixir
  * @category   Exceptions
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -97,11 +97,11 @@ class Elixir_Exception extends Exception {
 	public static function handler(Exception $e)
 	{
 		$response = Elixir_Exception::_handler($e);
-        if ('product' !== Yaf_Application::app()->environ()) {
+        if ('product' !== \Yaf\ENVIRON) {
             // Send the response to the browser
             echo $response;
         }
-		exit(1);
+//		exit(1);
 	}
 
 	/**
@@ -138,7 +138,7 @@ class Elixir_Exception extends Exception {
 
 			echo Elixir_Exception::text($e);
 
-			exit(1);
+//			exit(1);
 		}
 	}
 

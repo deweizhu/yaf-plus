@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * STDOUT log writer. Writes out messages to STDOUT.
  *
  * @package    Elixir
  * @category   Logging
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */

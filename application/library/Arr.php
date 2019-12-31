@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Array helper.
  *
  * @package    Elixir
  * @category   Helpers
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -657,9 +657,9 @@ class Arr {
 	    $results = [];
 	
 	    foreach ($array as $key => $value) {
-	        list($innerKey, $innerValue) = call_user_func($callback, $key, $value);
+	         $results[] = call_user_func($callback, $key, $value);
 	
-	        $results[$innerKey] = $innerValue;
+// 	        $results[$innerKey] = $innerValue;
 	    }
 	
 	    return $results;
@@ -1008,5 +1008,47 @@ class Arr {
 	    }
 	
 	    return $filtered;
+	}
+	
+	/**
+	 * 数组排列组合
+	 * @param array $arrs  二维数组
+	 * @param int $_current_index
+	 * @return array
+	 */
+	public static function sortPermutation(array $arrs,int $_current_index=-1):array 
+	{
+	    static $_total_arr;  //总数组
+	    
+	    static $_total_arr_index;  //总数组下标计数
+	    
+	    static $_total_count; //输入的数组长度
+	    
+	    static $_temp_arr; //临时拼凑数组
+	    
+	    if($_current_index<0)  //进入输入数组的第一层，清空静态数组，并初始化输入数组长度
+	    {
+	        $_total_arr=array();
+	        $_total_arr_index=0;
+	        $_temp_arr=array();
+	        $_total_count=count($arrs)-1;
+	        self::sortPermutation($arrs,0);
+	    }
+	    else
+	    {
+	        foreach($arrs[$_current_index] as $v) {
+	            if($_current_index<$_total_count){ //如果当前的循环的数组少于输入数组长度
+	                $_temp_arr[$_current_index]=$v;
+	                self::sortPermutation($arrs,$_current_index+1);
+	            } else if($_current_index==$_total_count) {
+	                $_temp_arr[$_current_index]=$v; //将当前数组循环出的值放入临时数组
+	                $_total_arr[$_total_arr_index]=$_temp_arr;  //将临时数组加入总数组
+	                $_total_arr_index++; //总数组下标计数+1
+	            }
+	    
+	        }
+	    }
+	    
+	    return $_total_arr;
 	}
 }

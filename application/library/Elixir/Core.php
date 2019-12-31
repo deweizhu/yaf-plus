@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 
 /**
  * Contains the most low-level helpers methods in Elixir:
@@ -10,7 +10,7 @@
  *
  * @package    Elixir
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -27,7 +27,7 @@ class Elixir_Core
     const DEVELOPMENT = 40;
 
     // Security check that is added to all generated PHP files
-    const FILE_SECURITY = '<?php defined(\'SYSPATH\') OR die(\'No direct script access.\');';
+    const FILE_SECURITY = '<?php defined(\'DOCROOT\') OR die(\'No direct script access.\');';
 
     // Format of cache files: header, cache name, and data
     const FILE_CACHE = ":header \n\n// :name\n\n:data\n";
@@ -237,7 +237,8 @@ class Elixir_Core
             echo "Global variable overload attack detected! Request aborted.\n";
 
             // Exit with an error status
-            exit(1);
+            return;
+//            exit(1);
         }
 
         // Get the variable names of all globals

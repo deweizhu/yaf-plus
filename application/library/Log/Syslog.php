@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Syslog log writer.
  *
  * @package    Elixir
  * @category   Logging
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2012 Elixir Team
  * @license
  */

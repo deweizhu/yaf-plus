@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * A port of [phputf8](http://phputf8.sourceforge.net/) to a unified set
  * of files. Provides multi-byte aware replacement string functions.
@@ -16,7 +16,7 @@
  *
  * @package    Elixir
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @copyright  (c) 2005 Harry Fuecks
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
@@ -127,7 +127,7 @@ class UTF8 {
 	 *
 	 *     $ascii = self::transliterate_to_ascii($utf8);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    string to transliterate
 	 * @param   integer $case   -1 lowercase only, +1 uppercase only, 0 both cases
 	 * @return  string
@@ -228,7 +228,7 @@ class UTF8 {
 	 *
 	 *     $position = self::strpos($str, $search);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    haystack
 	 * @param   string  $search needle
 	 * @param   integer $offset offset from which character in haystack to start searching
@@ -264,7 +264,7 @@ class UTF8 {
 	 *
 	 *     $position = self::strrpos($str, $search);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    haystack
 	 * @param   string  $search needle
 	 * @param   integer $offset offset from which character in haystack to start searching
@@ -299,7 +299,7 @@ class UTF8 {
 	 *
 	 *     $sub = self::substr($str, $offset);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    input string
 	 * @param   integer $offset offset
 	 * @param   integer $length length limit
@@ -381,7 +381,7 @@ class UTF8 {
 	 *
 	 *     $str = self::substr_replace($str, $replacement, $offset);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str            input string
 	 * @param   string  $replacement    replacement string
 	 * @param   integer $offset         offset
@@ -406,7 +406,7 @@ class UTF8 {
 	 *
 	 *     $str = self::strtolower($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str mixed case string
 	 * @return  string
 	 * @uses    self::$server_utf8
@@ -491,7 +491,7 @@ class UTF8 {
 	 * Makes a UTF-8 string uppercase. This is a UTF8-aware version
 	 * of [strtoupper](http://php.net/strtoupper).
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str mixed case string
 	 * @return  string
 	 * @uses    self::$server_utf8
@@ -578,7 +578,7 @@ class UTF8 {
 	 *
 	 *     $str = self::ucfirst($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str mixed case string
 	 * @return  string
 	 */
@@ -597,7 +597,7 @@ class UTF8 {
 	 *
 	 *     $str = self::ucwords($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str mixed case string
 	 * @return  string
 	 */
@@ -622,7 +622,7 @@ class UTF8 {
 	 *
 	 *     $compare = self::strcasecmp($str1, $str2);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str1   string to compare
 	 * @param   string  $str2   string to compare
 	 * @return  integer less than 0 if str1 is less than str2
@@ -647,7 +647,7 @@ class UTF8 {
 	 * [!!] This function is very slow compared to the native version. Avoid
 	 * using it when possible.
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string|array    $search     text to replace
 	 * @param   string|array    $replace    replacement text
 	 * @param   string|array    $str        subject text
@@ -723,7 +723,7 @@ class UTF8 {
 	 *
 	 *     $found = self::stristr($str, $search);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    input string
 	 * @param   string  $search needle
 	 * @return  string  matched substring if found
@@ -754,7 +754,7 @@ class UTF8 {
 	 *
 	 *     $found = self::strspn($str, $mask);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    input string
 	 * @param   string  $mask   mask for search
 	 * @param   integer $offset start position of the string to examine
@@ -788,7 +788,7 @@ class UTF8 {
 	 *
 	 *     $found = self::strcspn($str, $mask);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str    input string
 	 * @param   string  $mask   mask for search
 	 * @param   integer $offset start position of the string to examine
@@ -822,7 +822,7 @@ class UTF8 {
 	 *
 	 *     $str = self::str_pad($str, $length);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str                input string
 	 * @param   integer $final_str_length   desired string length after padding
 	 * @param   string  $pad_str            string to use as padding
@@ -878,7 +878,7 @@ class UTF8 {
 	 *
 	 *     $array = self::str_split($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str            input string
 	 * @param   integer $split_length   maximum length of each chunk
 	 * @return  array
@@ -906,7 +906,7 @@ class UTF8 {
 	 *
 	 *     $str = self::strrev($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str string to be reversed
 	 * @return  string
 	 */
@@ -925,7 +925,7 @@ class UTF8 {
 	 *
 	 *     $str = self::trim($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str        input string
 	 * @param   string  $charlist   string of characters to remove
 	 * @return  string
@@ -944,7 +944,7 @@ class UTF8 {
 	 *
 	 *     $str = self::ltrim($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str        input string
 	 * @param   string  $charlist   string of characters to remove
 	 * @return  string
@@ -968,7 +968,7 @@ class UTF8 {
 	 *
 	 *     $str = self::rtrim($str);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $str        input string
 	 * @param   string  $charlist   string of characters to remove
 	 * @return  string
@@ -992,7 +992,7 @@ class UTF8 {
 	 *
 	 *     $digit = self::ord($character);
 	 *
-	 * @author    知名不具
+	 * @author    Not well-known man
 	 * @param   string  $chr    UTF-8 encoded character
 	 * @return  integer
 	 */

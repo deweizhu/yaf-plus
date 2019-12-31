@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Database query builder for UPDATE statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
  * @package    Elixir/Database
  * @category   Query
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -109,7 +109,8 @@ class Database_Query_Builder_Update extends Database_Query_Builder_Where {
 			$query .= ' '.$this->_compile_order_by($db, $this->_order_by);
 		}
 
-		if ($this->_limit !== NULL)
+		//update limit 只对mysql有效
+		if (Database::isMySQL() && $this->_limit !== NULL)
 		{
 			// Add limiting
 			$query .= ' LIMIT '.$this->_limit;

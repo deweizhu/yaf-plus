@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * File log writer. Writes out messages and stores them in a YYYY/MM directory.
  *
  * @package    Elixir
  * @category   Logging
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -16,7 +16,7 @@ class Log_File extends Log_Writer {
 	protected $_directory;
 
 	// Security check that is added to all generated PHP files
-	const FILE_SECURITY = '<?php defined(\'SYSPATH\') OR die(\'No direct script access.\');';
+	const FILE_SECURITY = '<?php defined(\'DOCROOT\') OR die(\'No direct script access.\');';
 
 
 	/**

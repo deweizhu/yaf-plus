@@ -1,11 +1,11 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 
 /**
  * Date helper.
  *
  * @package        Elixir
  * @category       Helpers
- * @author         知名不具
+ * @author         Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */

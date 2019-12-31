@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php
 
 class Auth 
 { 
@@ -40,7 +40,7 @@ class Auth
      */
     public function __construct()
     {
-        $this->config = Yaf_Application::app()->getConfig()->get('auth');
+        $this->config = Yaf\Application::app()->getConfig()->get('auth');
     	if ( ! $type = $this->config->get('driver'))
     	{
     		$type = 'database';

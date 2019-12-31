@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Message logging with observer-based log writing.
  *
@@ -6,7 +6,7 @@
  *
  * @package    Elixir
  * @category   Logging
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */

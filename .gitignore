@@ -6,3 +6,5 @@ resources/fonts/
 resources/watermark/
 storage/cache/
 storage/logs/
+vendor/
+composer.lock

@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Database expressions can be used to add unescaped SQL fragments to a
  * [Database_Query_Builder] object.
@@ -12,7 +12,7 @@
  * 
  * @package    Elixir/Database
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2009 Elixir Team
  * @license
  */

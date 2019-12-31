@@ -1,11 +1,11 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 
 /**
  * Text helper class. Provides simple methods for working with text.
  *
  * @package    Elixir
  * @category   Helpers
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -243,7 +243,6 @@ class Text
                 $str[mt_rand(0, $length - 1)] = chr(mt_rand(65, 90));
             }
         }
-
         return $str;
     }
 
@@ -630,7 +629,7 @@ class Text
      * @param string $data
      * @return string
      */
-    public static function authtoken($data = null, string $IMEI):string
+    public static function authtoken($data = ''):string
     {
         if (PHP_SAPI == 'cli') {
             $http_host = '';
@@ -638,7 +637,7 @@ class Text
             $http_scheme = (($scheme = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : null) == 'off' || empty($scheme)) ? 'http' : 'https';
             $http_host = $http_scheme . '://' . $_SERVER['HTTP_HOST'];
         }
-        return self::token($http_host . $data . $IMEI);
+        return self::token($http_host . $data);
     }
     /**
      * 生成guid
@@ -1030,7 +1029,7 @@ class Text
     
     /**
      * 函数将字串转换为URL友好型
-     * 例：slug("xweisoft media", "-");  //xweisoft-media
+     * 例：slug("xxxx media", "-");  //xxxx-media
      *
      * @param  string  $title
      * @param  string  $separator

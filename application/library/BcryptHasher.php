@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author 知名不具
+ * @author Not well-known man
  *  用户 密码加密
  */
 class BcryptHasher

@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 
 /**
  * Database connection wrapper/helper.
@@ -11,9 +11,9 @@
  * [Database_Query] and [Database_Query_Builder] objects, which can be easily
  * created using the [DB] helper class.
  *
- * @package    Elixir/Database
- * @category   Base
- * @author    知名不具
+ * @package        Elixir/Database
+ * @category       Base
+ * @author         Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -27,7 +27,7 @@ abstract class Elixir_Database
     const DELETE = 4;
 
     protected $transactions = 0;
-    
+
     /**
      * @var  string  default instance name
      */
@@ -37,6 +37,15 @@ abstract class Elixir_Database
      * @var  array  Database instances
      */
     public static $instances = array();
+
+
+    /**
+     * 数据库驱动
+     * @var string
+     */
+    public static $driver = '';
+    const MYSQL = 'mysql';
+    const MSSQL = 'sqlsrv';
 
     /**
      * Get a singleton Database instance. If configuration is not specified,
@@ -51,47 +60,46 @@ abstract class Elixir_Database
      *
      * @param   string $name instance name
      * @param   array $config configuration parameters
+     *
      * @return  Database
      */
-    public static function instance(string $name = '', array $config = NULL): Database
+    public static function instance(string $name = 'default', array $config = NULL): Database
     {
-        if ($name === '') {
-            // Use the default instance name
-            $name = Database::$default;
-        }
-
         if (!isset(Database::$instances[$name])) {
             if ($config === NULL) {
                 // Load the configuration for this database
-                $config = Yaf_Application::app()->getConfig()->get('database')->$name;
-            }
-            if (!isset($config['adapter'])) {
-                throw new Elixir_Exception('Database type not defined in :name configuration',
-                    array(':name' => $name));
+                $config = Yaf\Application::app()->getConfig()->get('database.' . $name);
             }
 
             $_config = array('charset' => $config->charset);
-            list($_config['type'], $adapter) = explode('_', $config->adapter);
-            $_config['type'] = strtoupper($_config['type']);
-            $dsn = sprintf('%s:host=%s;dbname=%s', $adapter, $config->host, $config->dbname);
             $_config['connection'] = array(
-                'dsn'        => $dsn,
-                'username'   => $config->username,
-                'password'   => $config->password,
+                'dsn' => $config->dsn,
+                'username' => $config->username,
+                'password' => $config->password,
                 'persistent' => $config->persistent,
             );
             $_config['table_prefix'] = $config->table_prefix;
-            $_config['dbname'] = $config->dbname;
-            // Set the driver class name
-            $driver = 'Database_' . ucfirst($_config['type']);
-            // Create the database connection instance
-            $driver = new $driver($name, $_config);
-            // Store the database instance
-            Database::$instances[$name] = $driver;
+
+            //sqlsrv:server=tcp:127.0.0.1,1433; Database=test;
+            if (strncmp($config->dsn, 'sqlsrv', 6) === 0) {
+                self::$driver = self::MSSQL;
+                preg_match('#(?:.*)Database=([^;]+)#', $config->dsn, $matches);
+                $_config['dbname'] = $matches[1];
+                // Create the database connection instance
+                Database::$instances[$name] = new Database_MSSQL($name, $_config);
+            } else {
+                //mysql:host=127.0.0.1;dbname=test
+                self::$driver = self::MYSQL;
+                preg_match('#(?:.*)dbname=([^;]+)#', $config->dsn, $matches);
+                $_config['dbname'] = $matches[1];
+                // Create the database connection instance
+                Database::$instances[$name] = new Database_MySQL($name, $_config);
+            }
         }
 
         return Database::$instances[$name];
     }
+
 
     /**
      * @var  string  the last query executed
@@ -100,6 +108,7 @@ abstract class Elixir_Database
 
     // Character that is used to quote identifiers
     protected $_identifier = '`';
+    protected $_identifier_end = '`';
 
     // Instance name
     protected $_instance;
@@ -190,7 +199,9 @@ abstract class Elixir_Database
      *     $db->set_charset('utf8');
      *
      * @throws  Elixir_Exception
+     *
      * @param   string $charset character set name
+     *
      * @return  void
      */
     abstract public function set_charset(string $charset);
@@ -208,11 +219,59 @@ abstract class Elixir_Database
      * @param   string $sql SQL query
      * @param   bool $as_object result object class string, TRUE for stdClass, FALSE for assoc array
      * @param   array $params object construct parameters for result class
+     *
      * @return  object   Database_Result for SELECT queries
      * @return  array    list (insert id, row count) for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
     abstract public function query(int $type, string $sql, $as_object = FALSE, array $params = [], array $ctorargs = []);
+
+    /**
+     *  执行select SQL
+     * @param string $sql
+     * @param array $params
+     * @param bool $as_object
+     * @param array $ctorargs
+     * @return object
+     */
+    public function select(string $sql, array $params = [], $as_object = FALSE, array $ctorargs = [])
+    {
+        return $this->query(Database::SELECT, $sql, $as_object, $params, $ctorargs);
+    }
+
+    /**
+     * 执行insert SQL
+     * @param string $sql
+     * @param array $params
+     * @return object
+     */
+    public function insert(string $sql, array $params = [])
+    {
+        return $this->query(Database::INSERT, $sql, FALSE, $params, []);
+    }
+
+    /**
+     *  执行 update SQL
+     * @param string $sql
+     * @param array $params
+     * @return object
+     */
+    public function update(string $sql, array $params = [])
+    {
+        return $this->query(Database::UPDATE, $sql, FALSE, $params, []);
+    }
+
+    /**
+     *  执行 delete SQL
+     * @param string $sql
+     * @param array $params
+     * @return object
+     */
+    public function delete(string $sql, array $params = [])
+    {
+        return $this->query(Database::UPDATE, $sql, FALSE, $params, []);
+    }
+
 
     /**
      * Start a SQL transaction
@@ -233,6 +292,7 @@ abstract class Elixir_Database
      *      }
      *
      * @param string $mode transaction mode
+     *
      * @return  boolean
      */
     abstract public function begin(string $mode = ''): bool;
@@ -265,6 +325,7 @@ abstract class Elixir_Database
      *
      * @param   mixed $table table name string or array(table, alias)
      * @param   string $where query string
+     *
      * @return  integer
      */
     public function count_records($table, string $where = ''): int
@@ -273,7 +334,7 @@ abstract class Elixir_Database
         $table = $this->quote_table($table);
         $total_row_count = $this->query(Database::SELECT, 'SELECT COUNT(*) AS total_row_count FROM ' . $table . $where, FALSE)
             ->get('total_row_count');
-        return  $total_row_count ? intval($total_row_count): 0;
+        return $total_row_count ? intval($total_row_count) : 0;
     }
 
     /**
@@ -282,6 +343,7 @@ abstract class Elixir_Database
      *     $db->datatype('char');
      *
      * @param   string $type SQL data type
+     *
      * @return  array
      */
     public function datatype(string $type): array
@@ -289,55 +351,55 @@ abstract class Elixir_Database
         static $types = array
         (
             // SQL-92
-            'bit'                             => array('type' => 'string', 'exact' => TRUE),
-            'bit varying'                     => array('type' => 'string'),
-            'char'                            => array('type' => 'string', 'exact' => TRUE),
-            'char varying'                    => array('type' => 'string'),
-            'character'                       => array('type' => 'string', 'exact' => TRUE),
-            'character varying'               => array('type' => 'string'),
-            'date'                            => array('type' => 'string'),
-            'dec'                             => array('type' => 'float', 'exact' => TRUE),
-            'decimal'                         => array('type' => 'float', 'exact' => TRUE),
-            'double precision'                => array('type' => 'float'),
-            'float'                           => array('type' => 'float'),
-            'int'                             => array('type' => 'int', 'min' => '-2147483648', 'max' => '2147483647'),
-            'integer'                         => array('type' => 'int', 'min' => '-2147483648', 'max' => '2147483647'),
-            'interval'                        => array('type' => 'string'),
-            'national char'                   => array('type' => 'string', 'exact' => TRUE),
-            'national char varying'           => array('type' => 'string'),
-            'national character'              => array('type' => 'string', 'exact' => TRUE),
-            'national character varying'      => array('type' => 'string'),
-            'nchar'                           => array('type' => 'string', 'exact' => TRUE),
-            'nchar varying'                   => array('type' => 'string'),
-            'numeric'                         => array('type' => 'float', 'exact' => TRUE),
-            'real'                            => array('type' => 'float'),
-            'smallint'                        => array('type' => 'int', 'min' => '-32768', 'max' => '32767'),
-            'time'                            => array('type' => 'string'),
-            'time with time zone'             => array('type' => 'string'),
-            'timestamp'                       => array('type' => 'string'),
-            'timestamp with time zone'        => array('type' => 'string'),
-            'varchar'                         => array('type' => 'string'),
+            'bit' => array('type' => 'string', 'exact' => TRUE),
+            'bit varying' => array('type' => 'string'),
+            'char' => array('type' => 'string', 'exact' => TRUE),
+            'char varying' => array('type' => 'string'),
+            'character' => array('type' => 'string', 'exact' => TRUE),
+            'character varying' => array('type' => 'string'),
+            'date' => array('type' => 'string'),
+            'dec' => array('type' => 'float', 'exact' => TRUE),
+            'decimal' => array('type' => 'float', 'exact' => TRUE),
+            'double precision' => array('type' => 'float'),
+            'float' => array('type' => 'float'),
+            'int' => array('type' => 'int', 'min' => '-2147483648', 'max' => '2147483647'),
+            'integer' => array('type' => 'int', 'min' => '-2147483648', 'max' => '2147483647'),
+            'interval' => array('type' => 'string'),
+            'national char' => array('type' => 'string', 'exact' => TRUE),
+            'national char varying' => array('type' => 'string'),
+            'national character' => array('type' => 'string', 'exact' => TRUE),
+            'national character varying' => array('type' => 'string'),
+            'nchar' => array('type' => 'string', 'exact' => TRUE),
+            'nchar varying' => array('type' => 'string'),
+            'numeric' => array('type' => 'float', 'exact' => TRUE),
+            'real' => array('type' => 'float'),
+            'smallint' => array('type' => 'int', 'min' => '-32768', 'max' => '32767'),
+            'time' => array('type' => 'string'),
+            'time with time zone' => array('type' => 'string'),
+            'timestamp' => array('type' => 'string'),
+            'timestamp with time zone' => array('type' => 'string'),
+            'varchar' => array('type' => 'string'),
 
             // SQL:1999
-            'binary large object'             => array('type' => 'string', 'binary' => TRUE),
-            'blob'                            => array('type' => 'string', 'binary' => TRUE),
-            'boolean'                         => array('type' => 'bool'),
-            'char large object'               => array('type' => 'string'),
-            'character large object'          => array('type' => 'string'),
-            'clob'                            => array('type' => 'string'),
+            'binary large object' => array('type' => 'string', 'binary' => TRUE),
+            'blob' => array('type' => 'string', 'binary' => TRUE),
+            'boolean' => array('type' => 'bool'),
+            'char large object' => array('type' => 'string'),
+            'character large object' => array('type' => 'string'),
+            'clob' => array('type' => 'string'),
             'national character large object' => array('type' => 'string'),
-            'nchar large object'              => array('type' => 'string'),
-            'nclob'                           => array('type' => 'string'),
-            'time without time zone'          => array('type' => 'string'),
-            'timestamp without time zone'     => array('type' => 'string'),
+            'nchar large object' => array('type' => 'string'),
+            'nclob' => array('type' => 'string'),
+            'time without time zone' => array('type' => 'string'),
+            'timestamp without time zone' => array('type' => 'string'),
 
             // SQL:2003
-            'bigint'                          => array('type' => 'int', 'min' => '-9223372036854775808', 'max' => '9223372036854775807'),
+            'bigint' => array('type' => 'int', 'min' => '-9223372036854775808', 'max' => '9223372036854775807'),
 
             // SQL:2008
-            'binary'                          => array('type' => 'string', 'binary' => TRUE, 'exact' => TRUE),
-            'binary varying'                  => array('type' => 'string', 'binary' => TRUE),
-            'varbinary'                       => array('type' => 'string', 'binary' => TRUE),
+            'binary' => array('type' => 'string', 'binary' => TRUE, 'exact' => TRUE),
+            'binary varying' => array('type' => 'string', 'binary' => TRUE),
+            'varbinary' => array('type' => 'string', 'binary' => TRUE),
         );
 
         if (isset($types[$type]))
@@ -357,6 +419,7 @@ abstract class Elixir_Database
      *     $tables = $db->list_tables('user%');
      *
      * @param   string $like table to search for
+     *
      * @return  array
      */
     abstract public function list_tables(string $like = ''): string;
@@ -377,6 +440,7 @@ abstract class Elixir_Database
      * @param   string $table table to get columns from
      * @param   string $like column to search for
      * @param   boolean $add_prefix whether to add the table prefix automatically or not
+     *
      * @return  array
      */
     abstract public function list_columns(string $table, string $like = NULL, bool $add_prefix = TRUE): array;
@@ -386,6 +450,7 @@ abstract class Elixir_Database
      *
      * @param string $table table to get columns from
      * @param bool $add_prefix whether to add the table prefix automatically or not
+     *
      * @return mixed
      */
     abstract public function get_primary(string $table, bool $add_prefix = TRUE);
@@ -397,6 +462,7 @@ abstract class Elixir_Database
      *     list($type, $length) = $db->_parse_type('CHAR(6)');
      *
      * @param   string $type
+     *
      * @return  array   list containing the type and length, if any
      */
     protected function _parse_type($type): array
@@ -455,6 +521,7 @@ abstract class Elixir_Database
      * All other objects will be converted using the `__toString` method.
      *
      * @param   mixed $value any value to quote
+     *
      * @return  string
      * @uses    Database::escape
      */
@@ -479,9 +546,14 @@ abstract class Elixir_Database
             }
         } elseif (is_array($value)) {
             return '(' . implode(', ', array_map(array($this, __FUNCTION__), $value)) . ')';
-        } elseif (is_numeric($value) AND is_int($value+0)) {
+        }
+        elseif (is_numeric($value) AND strlen($value) > 10){
+            //手机号、订单号等数字
+            return $this->escape($value);
+        }
+        elseif (is_numeric($value) AND is_int($value + 0)) {
             return (int)$value;
-        } elseif (is_numeric($value) AND is_float($value+0)) {
+        } elseif (is_numeric($value) AND is_float($value + 0)) {
             // Convert to non-locale aware float to prevent possible commas
             return sprintf('%F', $value);
         }
@@ -504,57 +576,12 @@ abstract class Elixir_Database
      * All other objects will be converted using the `__toString` method.
      *
      * @param   mixed $column column name or array(column, alias)
+     *
      * @return  string
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_column($column): string
-    {
-        // 给列名加``转义符
-        $_identifier = '`';
-        if (is_array($column)) {
-            list($column, $alias) = $column;
-            $alias = str_replace($_identifier, '', $alias);
-        }
-        if ($column instanceof Database_Query) {
-            // Create a sub-query
-            $column = '(' . $column->compile($this) . ')';
-        } elseif ($column instanceof Database_Expression) {
-            // Compile the expression
-            $column = $column->compile($this);
-        } else {
-            // Convert to a string
-            $column = (string)$column;
-            $column = str_replace($_identifier, '', $column);
-            if ($column === '*') {
-                return $column;
-            } elseif (strpos($column, '.') !== FALSE) {
-                $parts = explode('.', $column);
-                if ($prefix = $this->table_prefix()) {
-                    // Get the offset of the table name, 2nd-to-last part
-                    $offset = count($parts) - 2;
-
-                    // Add the table prefix to the table name
-                    $parts[$offset] = $prefix . $parts[$offset];
-                }
-
-                foreach ($parts as & $part) {
-                    if ($part !== '*') {
-                        // Quote each of the parts
-                        $part = $_identifier . $part . $_identifier;
-                    }
-                }
-                $column = implode('.', $parts);
-            } else {
-                $column = $_identifier . $column . $_identifier;
-            }
-        }
-
-        if (isset($alias)) {
-            $column .= ' AS ' . $_identifier . $alias . $_identifier;
-        }
-        return $column;
-    }
+    abstract public function quote_column($column): string;
 
     /**
      * Quote a database table name and adds the table prefix if needed.
@@ -570,66 +597,12 @@ abstract class Elixir_Database
      *
      * @param   mixed $table table name or array(table, alias)
      * @param   string|null $alias table name alias
+     *
      * @return  string
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_table($table): string
-    {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
-
-        //支持两个string参数'table', 'alias'
-        if (func_num_args() === 2){
-            list($table, $alias) = func_get_args();
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
-        }
-        elseif (is_array($table)) {
-            list($table, $alias) = $table;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
-        }
-
-        if ($table instanceof Database_Query) {
-            // Create a sub-query
-            $table = '(' . $table->compile($this) . ')';
-        } elseif ($table instanceof Database_Expression) {
-            // Compile the expression
-            $table = $table->compile($this);
-        } else {
-            // Convert to a string
-            $table = (string)$table;
-
-            $table = str_replace($this->_identifier, $escaped_identifier, $table);
-
-            if (strpos($table, '.') !== FALSE) {
-                $parts = explode('.', $table);
-
-                if ($prefix = $this->table_prefix()) {
-                    // Get the offset of the table name, last part
-                    $offset = count($parts) - 1;
-
-                    // Add the table prefix to the table name
-                    $parts[$offset] = $prefix . $parts[$offset];
-                }
-
-                foreach ($parts as & $part) {
-                    // Quote each of the parts
-                    $part = $this->_identifier . $part . $this->_identifier;
-                }
-
-                $table = implode('.', $parts);
-            } else {
-                // Add the table prefix
-                $table = $this->_identifier . $this->table_prefix() . $table . $this->_identifier;
-            }
-        }
-
-        if (isset($alias)) {
-            $table .= ' AS ' . $this->_identifier  . $alias . $this->_identifier;
-        }
-
-        return $table;
-    }
+    abstract public function quote_table($table): string;
 
     /**
      * Quote a database identifier
@@ -640,50 +613,10 @@ abstract class Elixir_Database
      * All other objects will be converted using the `__toString` method.
      *
      * @param   mixed $value any identifier
+     *
      * @return  string
      */
-    public function quote_identifier($value): string
-    {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
-
-        if (is_array($value)) {
-            list($value, $alias) = $value;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
-        }
-
-        if ($value instanceof Database_Query) {
-            // Create a sub-query
-            $value = '(' . $value->compile($this) . ')';
-        } elseif ($value instanceof Database_Expression) {
-            // Compile the expression
-            $value = $value->compile($this);
-        } else {
-            // Convert to a string
-            $value = (string)$value;
-
-            $value = str_replace($this->_identifier, $escaped_identifier, $value);
-
-            if (strpos($value, '.') !== FALSE) {
-                $parts = explode('.', $value);
-
-                foreach ($parts as & $part) {
-                    // Quote each of the parts
-                    $part = $this->_identifier . $part . $this->_identifier;
-                }
-
-                $value = implode('.', $parts);
-            } else {
-                $value = $this->_identifier . $value . $this->_identifier;
-            }
-        }
-
-        if (isset($alias)) {
-            $value .= ' AS ' . $this->_identifier . $alias . $this->_identifier;
-        }
-
-        return $value;
-    }
+    abstract public function quote_identifier($value): string;
 
     /**
      * Sanitize a string by escaping characters that could cause an SQL
@@ -692,6 +625,7 @@ abstract class Elixir_Database
      *     $value = $db->escape('any string');
      *
      * @param   string $value value to quote
+     *
      * @return  string
      */
     abstract public function escape(string $value): string;
@@ -701,6 +635,7 @@ abstract class Elixir_Database
      * 创建像这样的查询: "IN('a','b')";
      *
      * @access   public
+     *
      * @param    array $item_list 列表数组或字符串
      * @param    string $field_name 字段名称
      *
@@ -729,16 +664,39 @@ abstract class Elixir_Database
      * @param string $order 排序
      * @param int $page 页码
      * @param int $size 每页数量
+     *
      * @return array
      */
-    public function paging($table, $fields = '*', string $where = '',  string $order = '', int $page = 1, int $size = 16): array
+    abstract public function paging($table, $fields = '*', string $where = '', string $order = '', int $page = 1, int $size =
+    16): array;
+
+
+    /**
+     * 是否为MySQL驱动？
+     * @return bool  true|false
+     */
+    public static function isMySQL(): bool
     {
-        // Quote the table name
-        $table = $this->quote_table($table);
-        $offset = $page > 1 ? ($page - 1) * $size : 0;
-        $sql = 'SELECT ' . $fields . ' FROM ' . $table . $where . ($order ? ' ORDER BY ' . $order : '') .
-            ' LIMIT ' . $size . ' OFFSET ' . $offset;
-        return $this->query(Database::SELECT, $sql)->result();
+        return self::$driver === self::MYSQL;
+    }
+
+    /**
+     * 是否为MS Sql Server驱动？
+     * @return bool  true|false
+     */
+    public static function isMSSQL(): bool
+    {
+        return self::$driver === self::MSSQL;
+    }
+
+    /**
+     * 获取PDO对象
+     * @return mixed
+     */
+    public function getConnection()
+    {
+        $this->_connection or $this->connect();
+        return $this->_connection;
     }
 
 } // End Database_Connection

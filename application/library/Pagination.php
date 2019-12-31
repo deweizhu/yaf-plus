@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
 
 /**
  *
@@ -124,7 +124,7 @@ class Pagination
     public static function factory()
     {
         if (is_null(Pagination::$config)) {
-            Pagination::$config = Yaf_Application::app()->getConfig()->get('pagination');
+            Pagination::$config = Yaf\Application::app()->getConfig()->get('pagination');
         }
         $group = Pagination::$config->get('default');
         $group = !is_array($group) ? array() : $group;

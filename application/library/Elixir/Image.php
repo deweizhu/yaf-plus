@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Image manipulation support. Allows images to be resized, cropped, etc.
  * 图片处理类用法：
@@ -7,7 +7,7 @@
  * ->save(DOCROOT . '/thumb.jpg', 65);
  * @package    Elixir/Image
  * @category   Base
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -182,7 +182,7 @@ abstract class Elixir_Image {
 	public function resize($width = NULL, $height = NULL, $master = NULL)
 	{
          if($master == Image::AUTO) {
-            /*{{{新缩略图尺寸算法，Added By zdw */
+            /*{{{新缩略图尺寸算法，Added By Not well-known man */
             if($width > $this->width && $height > $this->height) {
                 $width = $this->width;
                 $height = $this->height;
@@ -653,7 +653,7 @@ abstract class Elixir_Image {
 		{
 			// Get the directory of the file
 			$directory = realpath(pathinfo($file, PATHINFO_DIRNAME));
-            //{{{  尝试自动创建目录 Added By zdw
+            //{{{  尝试自动创建目录 Added By Not well-known man
             if (!is_dir($directory)) {
                 @mkdir($directory, 0755, true);
             }

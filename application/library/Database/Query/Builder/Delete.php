@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Database query builder for DELETE statements. See [Query Builder](/database/query/builder) for usage and examples.
  *
  * @package    Elixir/Database
  * @category   Query
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */

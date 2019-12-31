@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Cookie helper.
  *
  * @package    Elixir
  * @category   Helpers
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -13,7 +13,7 @@ class Cookie {
 	/**
 	 * @var  string  Magic salt to add to the cookie
 	 */
-	public static $salt = NULL;
+	public static $salt = 'salt';
 
 	/**
 	 * @var  integer  Number of seconds before the cookie expires
@@ -54,6 +54,9 @@ class Cookie {
 	 */
 	public static function get($key, $default = NULL)
 	{
+        if (PHP_SWOOLE) {
+            return self::_getSwoole($key, $default);
+        }
 		if ( ! isset($_COOKIE[$key]))
 		{
 			// The cookie does not exist
@@ -82,6 +85,37 @@ class Cookie {
 		}
 
 		return $default;
+	}
+
+    private static function _getSwoole(string $key, $default = NULL)
+    {
+        if (!isset(HttpServer::$request->cookie[$key])) {
+            // The cookie does not exist
+            return $default;
+        }
+
+        // Get the cookie value
+        $cookie = HttpServer::$request->cookie[$key];
+
+        // Find the position of the split between salt and contents
+        $split = strlen(Cookie::salt($key, NULL));
+
+        if (isset($cookie[$split]) AND $cookie[$split] === '~')
+        {
+            // Separate the salt and the value
+            list ($hash, $value) = explode('~', $cookie, 2);
+
+            if (Security::slow_equals(Cookie::salt($key, $value), $hash))
+            {
+                // Cookie signature is valid
+                return $value;
+            }
+
+            // The cookie signature is invalid, delete it
+            static::delete($key);
+        }
+
+        return $default;
 	}
 
 	/**
@@ -132,8 +166,10 @@ class Cookie {
 	 */
 	public static function delete($name)
 	{
-		// Remove the cookie
-		unset($_COOKIE[$name]);
+	    if (PHP_SWOOLE)
+	        unset(HttpServer::$request->cookie[$name]);
+	    if (PHP_FPM)
+	        unset($_COOKIE[$name]);
 
 		// Nullify the cookie and make it expire
 		return static::_setcookie($name, NULL, -86400, Cookie::$path, Cookie::$domain, Cookie::$secure, Cookie::$httponly);
@@ -181,7 +217,11 @@ class Cookie {
 	 */
 	protected static function _setcookie($name, $value, $expire, $path, $domain, $secure, $httponly)
 	{
-		return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+	    if (PHP_FPM)
+		    return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+	    if (PHP_SWOOLE && HttpServer::$response)
+	        return HttpServer::$response->cookie($name, $value, $expire , $path, $domain, $secure ,
+                $httponly, '');
 	}
 
 	/**

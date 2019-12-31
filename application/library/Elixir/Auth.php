@@ -1,15 +1,18 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php
 /**
  * User authorization library. Handles user login and logout, as well as secure
  * password hashing.
  *
  * @package    Elixir/Auth
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
 abstract class Elixir_Auth {
 
+    /**
+     * @var Session
+     */
 	protected $_session;
 
 	protected $_config;
@@ -30,7 +33,7 @@ abstract class Elixir_Auth {
 		
         $this->name = $name;		
 
-		$this->_session = Session::instance($this->_config['session_type']);
+		$this->_session = Session::instance();
 		
 		$this->_cache = Cache::instance();
 	}
@@ -81,12 +84,12 @@ abstract class Elixir_Auth {
 		if ($destroy === TRUE)
 		{
 			// Destroy the session completely
-			$this->_session->destroy();
+			$this->_session->clear();
 		}
 		else
 		{
 			// Remove the user from the session
-			$this->_session->delete($this->getName());
+			$this->_session->remove($this->getName());
 
 			// Regenerate session_id
 			$this->_session->regenerate();

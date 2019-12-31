@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Support for image manipulation using [GD](http://php.net/GD).
  *
  * @package    Elixir/Image
  * @category   Drivers
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license    .html
  */

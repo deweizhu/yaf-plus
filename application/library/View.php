@@ -3,15 +3,14 @@
 /**
  * view 帮助类
  *
- * @author    知名不具
- * @date      : 2015-11-26
+ * @author    Not well-known man
+ *
  */
 class View
 {
     /**
      * 使用方法：
      * <?php echo View::asset('/asset/gmu/zepto.min.js'); ?>
-     * 在twig下使用：{{ asset('/asset/gmu/zepto.min.js') }}
      * asset/*.js,*.css文件URI处理，避免文件变更后浏览器缓存问题
      *
      * @param $uri
@@ -25,7 +24,7 @@ class View
         else
             list($context, $uri) = $args;
         //远程URL和min版、生产环境，直接返回
-        if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE || 'product' === Yaf_Application::app()->environ())
+        if (strpos($uri, '://') !== FALSE || strpos($uri, '.min') !== FALSE || 'product' === \Yaf\ENVIRON)
             return $uri;
         //开发环境下加随机数，防止浏览器缓存
         $file = PUBPATH . $uri;
@@ -33,18 +32,65 @@ class View
             $uri .= '?_' . filemtime($file);
         elseif (is_file($file . '.js')) {
             //pass
-        }
-        else
+        } else
             $uri = '';
         return $uri;
     }
 
     /**
+     * OSS上传服务器地址
+     * @return string
+     */
+    public static function ossUploadUrl(): string
+    {
+        return OssclientModel::instance()->createObjectURL();
+    }
+
+    /**
+     * OSS上传服务器地址
+     * @return string
+     */
+    public static function httpOssHostUrl(): string
+    {
+        return OssclientModel::instance()->createObjectURL();
+    }
+
+    /**
+     * csrf token
+     * @return string
+     */
+    public static function csrf_token(): string
+    {
+        $sess = Session::instance();
+        $sess->set('csrf_token', Text::token());
+        return $sess->get('csrf_token');
+    }
+
+    /**
+     * SVG单文件图标
+     * @param array ...$args
+     *
+     * @return string
+     */
+    public static function svgicon(...$args): string
+    {
+        if (func_num_args() === 1)
+            $svg = $args[0];
+        else
+            list($context, $svg) = $args;
+        //开发环境下加随机数，防止浏览器缓存
+        $filepath = PUBPATH . '/svg/' . $svg . '.svg';
+        if (is_file($filepath))
+            return strstr(file_get_contents($filepath), '<svg');
+        return '';
+    }
+
+    /**
      * 从模型中调用get方法取值
      *
-     * @param array  ...$args
+     * @param array ...$args
      * @param string $model 模型名称
-     * @param int    $id    主键值
+     * @param int $id 主键值
      * @param string $filed 字段列名
      *
      * @return string
@@ -68,11 +114,12 @@ class View
         return $class::instance()->get($id, $filed, TRUE);
     }
 
+
     /**
      * 构建相对URI
      *
-     * @param array  $param     原始URI参数
-     * @param array  $append    追加的参数
+     * @param array $param 原始URI参数
+     * @param array $append 追加的参数
      * @param string $delimiter 定义分隔符
      *
      * @return string
@@ -110,7 +157,7 @@ class View
     /**
      * 构建动态查询URI
      *
-     * @param array $param  原始URI参数
+     * @param array $param 原始URI参数
      * @param array $append 追加的参数
      *
      * @return string
@@ -143,11 +190,28 @@ class View
         $append = array();
         parse_str($q, $append);
         $param = $append ? array_merge($_GET, $append) : $_GET;
-        $uri = http_build_query(array_filter($param, function ($v){
-                if ($v === 0 || $v === '0')
-                    return TRUE;
-                return (bool)$v;
+        $uri = http_build_query(array_filter($param, function ($v) {
+            if ($v === 0 || $v === '0')
+                return TRUE;
+            return (bool)$v;
         }), '', '&');
         return $uri;
+    }
+
+    /**
+     * 生成指定内容和位置上的内容挂件
+     *
+     * @param int $contentid 内容ID
+     * @param string $place 挂件位置
+     * @return string 内容挂件的 SSI 引用代码
+     */
+    public static final function addonPlace($contentid, $place)
+    {
+        static $addon_mdl;
+        $addon_mdl = AddonModel::instance();
+        if (isset($contentid) && isset($place)) {
+            return $addon_mdl->renderPlace($contentid, $place);
+        }
+        return '';
     }
 }

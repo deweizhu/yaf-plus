@@ -3,7 +3,8 @@
 /**
  *  SPL Observer
  *
- * @author: ZDW
+ * @author: Not well-known man
+ *
  */
 class ObserverPlugin implements SplObserver
 {
@@ -32,16 +33,14 @@ class ObserverPlugin implements SplObserver
      */
     public function update(SplSubject $subject): bool
     {
-        $event = $subject->event;
+        $event = $subject->event?:$subject->_event;
         if (empty($this->config[$event])) {
             return FALSE;
         }
         foreach ($this->config[$event] as $file) {
             $class = $this->class . '_' . ucfirst($file) . 'Plugin';
-            if (!isset(self::$plugin[$file])) {
-                self::$plugin[$file] = new $class($subject);
-            }
-            self::$plugin[$file]->$event();
+            $plugin = new $class($subject);
+            $plugin->$event();
         }
         return TRUE;
     }

@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Object used for caching the results of select queries.  See [Results](/database/results#select-cached) for usage and examples.
  *
  * @package    Elixir/Database
  * @category   Query/Result
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2009 Elixir Team
  * @license
  */
@@ -13,7 +13,6 @@ class Database_Result_Cached extends Database_Result {
 	public function __construct(array $result, $sql, $as_object = NULL)
 	{
 		parent::__construct($result, $sql, $as_object);
-
 		// Find the number of rows in the result
 		$this->_total_rows = count($result);
 	}

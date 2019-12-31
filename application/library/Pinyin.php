@@ -3,8 +3,8 @@
 /**
  *  汉字转拼音库
  *
- * @author : 知名不具
- * @date   : 2017-02-15
+ * @author : Not well-known man
+ *
  */
 class Pinyin
 {

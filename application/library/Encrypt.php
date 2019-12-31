@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * The Encrypt library provides two-way encryption of text and binary strings
  * using the [Mcrypt](http://php.net/mcrypt) extension, which consists of three
@@ -19,7 +19,7 @@
  *
  * @package    Elixir
  * @category   Security
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -83,7 +83,7 @@ class Encrypt {
 		if ( ! isset(Encrypt::$instances[$name]))
 		{
 			// Load the configuration data
-            $config = Yaf_Application::app()->getConfig()->get('encrypt')->get($name);
+            $config = Yaf\Application::app()->getConfig()->get('encrypt')->get($name);
 
 			if ( ! isset($config['key']))
 			{

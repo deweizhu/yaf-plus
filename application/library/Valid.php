@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
 /**
  * Validation rules.
  *
  * @package    Elixir
  * @category   Security
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2016-2017 Elixir Team
  * @license
  */
@@ -264,11 +264,11 @@ class Valid {
     public static function mobilePhone($phone)
     {
         //检查电话号码
-        //移动：134、135、136、137、138、139、150、151、152、157、158、159、182、183、184、187、188、178(4G)、147(上网卡)；
-        //联通：130、131、132、155、156、185、186、176(4G)、145(上网卡)；
-        //电信：133、153、180、181、189 、177(4G)；
+        //移动：134、135、136、137、138、139、150、151、152、157、158、159、182、183、184、187、188、178(4G)、147(上网卡)、198；
+        //联通：130、131、132、155、156、185、186、176(4G)、145(上网卡)、166；
+        //电信：133、153、180、181、189 、177、199(4G)；
         //卫星通信：1349；虚拟运营商：170。
-        return preg_match('/^1[34578]{1}\d{9}$/', $phone);
+        return preg_match('/^1[3456789]{1}\d{9}$/', $phone);
     }
 
 	/**

@@ -1,10 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php
 /**
  * File Auth driver.
  * [!!] this Auth driver does not support roles nor autologin.
  *
  * @package    Elixir/Auth
- * @author    知名不具
+ * @author    Not well-known man
  * @copyright  (c) 2007-2012 Elixir Team
  * @license
  */
@@ -43,8 +43,9 @@ class Auth_Database extends Elixir_Auth {
         if(!array_has($credentials, 'password')) {
             return FALSE;
         }
-        
-        if(!empty($user) && bcrypt_check($credentials['password'], $user->password)){
+
+        $is_pass = bcrypt_check($credentials['password'], $user->password);
+        if (!empty($user) && $is_pass) {
             $remember_token = '';
             if(isset($user) && $remember === TRUE) {
                 $remember_token = str_random(32).time();
