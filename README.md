@@ -1,7 +1,7 @@
 ﻿**楔子**
 
 `追求卓越性能，PHP框架只选Yaf`  
-`己亥年、丙子月、癸卯日 署名不知何人，于花城`  
+ 
 
 **总纲**
 +   Yaf提供基础MVC功能
@@ -22,8 +22,8 @@
 
 
 **手册**
-+   Yaf: http://yaf.laruence.com/manual/
-+   Kohana: http://www.kohanaframework.org/
-+   模板twig: http://twig.sensiolabs.org/
++   Yaf: <https://yaf.laruence.com/manual/>
++   Kohana: <https://github.com/koseven/kohana/>
++   模板twig: <https://twig.sensiolabs.org/>
 
 
